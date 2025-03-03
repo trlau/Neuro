@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
+
 const Chat = () => {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
@@ -9,20 +10,65 @@ const Chat = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
+  
     setMessages((prev) => [...prev, { role: "user", content: input }]);
-
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "This is a test AI response." },
-      ]);
-    }, 1000);
-
+  
+    const requestBody = JSON.stringify({
+      role: "user",
+      model: "deepseek/deepseek-chat:free",
+      content: input
+    });
+  
+    try {
+      const response = await fetch("http://localhost:5000/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Keep-Alive": "true",
+          "Accept": "text/event-stream",
+        },
+        body: requestBody,
+      });
+  
+      if (!response.body) {
+        throw new Error("Readable stream not supported!");
+      }
+  
+      let assistantResponse = { role: "assistant", content: "" };
+      setMessages((prev) => [...prev, assistantResponse]);
+  
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      
+      let newMessage = "";
+  
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+  
+        // Decode and process streamed text
+        const chunk = decoder.decode(value, { stream: true });
+        newMessage += chunk;
+  
+        // Update the last assistant message dynamically
+        setMessages((prev) => {
+          const updatedMessages = [...prev];
+          updatedMessages[updatedMessages.length - 1] = {
+            role: "assistant",
+            content: newMessage,
+          };
+          return updatedMessages;
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching response:", error);
+    }
+  
     setInput("");
   };
-
+  
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white">
       {/* Top Bar */}
