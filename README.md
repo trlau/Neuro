@@ -1,39 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Neuro
+
+**Neuro** is an AI-driven research assistant designed to streamline the process of sourcing and summarizing academic literature. By integrating with Semantic Scholar, Neuro provides users with concise and relevant information based on their queries.
+
+## Features
+
+- **User Queries**: Submit research questions or topics of interest.
+- **AI Summarization**: The AI engine condenses user prompts into brief summaries.
+- **Semantic Scholar Integration**: Fetches pertinent academic sources to inform responses.
+- **Source-Based Summaries**: Generates answers grounded in retrieved scholarly articles.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- [Node.js](https://nodejs.org/) (version 14 or higher)
+- [npm](https://www.npmjs.com/) (version 6 or higher)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clone the Repository**:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   git clone https://github.com/trlau/neuro.git
+   cd neuro
+   ```
 
-## Learn More
+2. **Install Dependencies**:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Set Up Environment Variables**:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   Create a `.env` file in the root directory and add your API keys:
 
-## Deploy on Vercel
+   ```env
+   OPENAI_API_KEY=your_openai_api_key
+   SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Start the Application**:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   npm run dev
+   ```
 
-# neuro
-AI research agent
+   Access the application at `http://localhost:3000`.
+
+## Usage
+
+1. **Sign Up / Log In**: Create an account or log in to access the platform.
+2. **Enter a Query**: Input your research question or topic.
+3. **Select AI Engine**: Choose from available AI models for response generation.
+4. **Receive Summarized Response**: View concise answers with cited sources.
+5. **Access Full Articles**: Follow links to original research papers for in-depth reading.
+
+## Contributing
+
+We welcome contributions to enhance Neuro's capabilities:
+
+1. **Fork the Repository**: Click the 'Fork' button on GitHub.
+2. **Create a Feature Branch**: 
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Commit Changes**: 
+
+   ```bash
+   git commit -m 'Add new feature'
+   ```
+
+4. **Push to Branch**: 
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+5. **Open a Pull Request**: Submit your changes for review.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
