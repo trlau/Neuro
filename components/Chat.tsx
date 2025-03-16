@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-
+import Message from "./Message";
+import MessageInput from "./MessageInput";
 
 const Chat = () => {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
@@ -14,6 +15,7 @@ const Chat = () => {
     if (!input.trim()) return;
   
     setMessages((prev) => [...prev, { role: "user", content: input }]);
+    setInput(""); // Clear input immediately
   
     const requestBody = JSON.stringify({
       role: "user",
@@ -32,32 +34,43 @@ const Chat = () => {
         body: requestBody,
       });
   
-      if (!response.body) {
-        throw new Error("Readable stream not supported!");
-      }
+      if (!response.body) throw new Error("Readable stream not supported!");
   
       let assistantResponse = { role: "assistant", content: "" };
       setMessages((prev) => [...prev, assistantResponse]);
   
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      
       let newMessage = "";
   
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
   
-        // Decode and process streamed text
-        const chunk = decoder.decode(value, { stream: true });
-        newMessage += chunk;
+        newMessage += decoder.decode(value, { stream: true });
   
-        // Update the last assistant message dynamically
+        // **Final Dynamic AI Response Formatting**
+        let formattedMessage = newMessage
+          .replace(/\n\s*\n/g, "\n\n") // Normalize line breaks
+          .replace(/(\*\*)(.+?)(\*\*)/g, "\n$1$2$1\n") // Ensure bold headings are separated
+          .replace(/(:)\s*\n\s*/g, "$1 ") // Prevent line breaks after colons
+          .replace(/(###.*?)\n+/g, "\n\n---\n$1\n\n") // Ensure headings have separators before them
+          .replace(/(\n- )/g, "\n\n- ") // Ensure bullet points have spacing
+          .replace(/(\n\d+\.\s)/g, "\n\n$1") // Ensure numbered lists have spacing
+          .replace(/^\s*[-•]\s*$/gm, "") // Remove stray bullet points
+          .replace(/\n{3,}/g, "\n\n") // Prevent excessive blank lines
+          .replace(/(\d+\.\s)(?=\d+\.)/g, "$1\n") // Fix numbering consistency (1. → 2.)
+          .replace(/(Health Benefits|Nutritional Profile|Botanical Information):/g, "\n\n---\n**$1:**\n\n") // Ensure major section spacing with a line break
+          .replace(/- (.+?):/g, "\n- **$1:**") // Ensure key points in bullets are bold
+          .replace(/(\n\n)(?=-)/g, "\n") // Prevent excessive spacing before bullet points
+          .replace(/(\n\n)(?=\d+\.)/g, "\n") // Prevent excessive spacing before numbered lists
+          .trim();
+  
         setMessages((prev) => {
           const updatedMessages = [...prev];
           updatedMessages[updatedMessages.length - 1] = {
             role: "assistant",
-            content: newMessage,
+            content: formattedMessage,
           };
           return updatedMessages;
         });
@@ -65,49 +78,23 @@ const Chat = () => {
     } catch (error) {
       console.error("Error fetching response:", error);
     }
-  
-    setInput("");
-  };
-  
+  };  
+
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white">
-      {/* Top Bar */}
       <div className="p-4 bg-gray-800 border-b border-gray-700">
         <h1 className="text-xl font-semibold">Neuro AI Chat</h1>
       </div>
 
-      {/* Chat Messages */}
       <div className="flex-grow overflow-y-auto p-4">
-        {messages.length === 0 && (
-          <p className="text-gray-500 text-center mt-10">Start a conversation...</p>
-        )}
+        {messages.length === 0 && <p className="text-gray-500 text-center mt-10">Start a conversation...</p>}
         {messages.map((msg, index) => (
-          <div key={index} className={`p-2 my-1 ${msg.role === "user" ? "text-right" : "text-left"}`}>
-            <span className={`inline-block p-2 rounded-lg ${msg.role === "user" ? "bg-blue-500 text-white" : "bg-gray-700 text-white"}`}>
-              {msg.content}
-            </span>
-          </div>
+          <Message key={index} role={msg.role} content={msg.content} />
         ))}
         <div ref={chatEndRef} />
       </div>
 
-      {/* Chat Input */}
-      <div className="p-4 bg-gray-800 border-t border-gray-700 flex">
-        <input
-          type="text"
-          className="flex-grow p-3 bg-gray-700 border border-gray-600 rounded-l-lg text-white"
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        />
-        <button
-          onClick={sendMessage}
-          className="px-5 bg-blue-600 hover:bg-blue-500 transition rounded-r-lg text-white"
-        >
-          Send
-        </button>
-      </div>
+      <MessageInput input={input} setInput={setInput} sendMessage={sendMessage} />
     </div>
   );
 };
