@@ -9,13 +9,9 @@ const Layout = () => {
     console.log("Switch to chat:", id);
   };
 
-  const handleLogout = () => {
-    router.push("/login");
-  };
-
   return (
     <div className="flex h-screen w-screen">
-      <Sidebar onSelectChat={handleSelectChat} onLogout={handleLogout} />
+      <Sidebar onSelectChat={handleSelectChat} />
       <Chat />
     </div>
   );
