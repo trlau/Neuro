@@ -9,7 +9,8 @@ const firebaseConfig = {
   projectId: "aira-api",
   storageBucket: "aira-api.firebasestorage.app",
   messagingSenderId: "1026132151304",
-  appId: "1:1026132151304:web:0b8b75786fd018e8e7d5bd"
+  appId: "1:1026132151304:web:0b8b75786fd018e8e7d5bd",
+  measurementId: "G-09F4HM7SN8"
 };
 
 const app = initializeApp(firebaseConfig);

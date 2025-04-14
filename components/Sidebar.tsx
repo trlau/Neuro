@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Plus, LogOut, Settings } from "lucide-react";
 import { db, auth } from "../lib/firebase";
+import { logout } from "../lib/firebase";
 import {
   collection,
   query,
@@ -91,7 +92,7 @@ const Sidebar = ({ onSelectChat }: { onSelectChat: (id: string) => void }) => {
 
         <button
           className="flex items-center w-full px-4 py-3 gap-2 text-left rounded-lg hover:bg-gray-800 transition"
-          onClick={() => router.push("/login")}
+          onClick={() => {logout();router.push("/login")}}
         >
           <LogOut size={18} /> Logout
         </button>
