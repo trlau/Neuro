@@ -14,7 +14,7 @@ const Chat = () => {
     const checkApiConnection = async () => {
       try {
         const response = await fetch("http://localhost:5000", {
-          mode: "cors", // Add CORS mode explicitly
+          mode: "cors",
           headers: {
             "Accept": "application/json"
           }
@@ -53,8 +53,6 @@ const Chat = () => {
       console.log("Sending request to /api/source...");
       const sourceResponse = await fetch("http://localhost:5000/api/source", {
         method: "POST",
-        mode: "cors", // Add CORS mode explicitly
-        credentials: "omit", // Don't send cookies
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
@@ -78,8 +76,6 @@ const Chat = () => {
       console.log("Sending request to /api/paper/search...");
       const paperSearchResponse = await fetch(`http://localhost:5000/api/paper/search?query=${keywords}`, {
         method: "GET",
-        mode: "cors", // Add CORS mode explicitly
-        credentials: "omit", // Don't send cookies
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
@@ -95,9 +91,9 @@ const Chat = () => {
       console.log("Paper search results:", paperData);
       
       // Show a temporary loading message
-      setMessages((prev) => [...prev, { role: "assistant", content: "Researching..." }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "..." }]);
       
-      // Step.3: Format paper data to include in the AI prompt
+      // Step 3: Format paper data to include in the AI prompt
       let enhancedInput = userMessage + "\n\n";
       
       if (paperData && paperData.length > 0) {
@@ -122,8 +118,6 @@ const Chat = () => {
       console.log("Sending request to /api/generate...");
       const generateResponse = await fetch("http://localhost:5000/api/generate", {
         method: "POST",
-        mode: "cors", // Add CORS mode explicitly
-        credentials: "omit", // Don't send cookies
         headers: {
           "Content-Type": "application/json",
           "Accept": "text/event-stream",
@@ -161,21 +155,27 @@ const Chat = () => {
         const chunk = decoder.decode(value, { stream: true });
         newMessage += chunk;
     
-        // **Dynamic AI Response Formatting**
+        // Improved AI Response Formatting
+        // This is more robust to handle various response formats
         let formattedMessage = newMessage
-          .replace(/\n\s*\n/g, "\n\n") // Normalize line breaks
-          .replace(/(\*\*)(.+?)(\*\*)/g, "\n$1$2$1\n") // Ensure bold headings are separated
-          .replace(/(:)\s*\n\s*/g, "$1 ") // Prevent line breaks after colons
-          .replace(/(###.*?)\n+/g, "\n\n---\n$1\n\n") // Ensure headings have separators before them
-          .replace(/(\n- )/g, "\n\n- ") // Ensure bullet points have spacing
-          .replace(/(\n\d+\.\s)/g, "\n\n$1") // Ensure numbered lists have spacing
-          .replace(/^\s*[-•]\s*$/gm, "") // Remove stray bullet points
+          // Basic cleaning
+          .replace(/\s*\n\s*\n\s*\n+/g, "\n\n") // Normalize excessive line breaks
+          
+          // Headers formatting
+          .replace(/^(#+)\s+(.+)$/gm, "\n\n$1 $2\n") // Add spacing around headers
+          
+          // List formatting
+          .replace(/^(\s*[-•])\s+/gm, "\n$1 ") // Clean up bullet points
+          .replace(/^(\s*\d+\.)\s+/gm, "\n$1 ") // Clean up numbered lists
+          
+          // Bold formatting
+          .replace(/\*\*([^*\n]+)\*\*/g, "**$1**") // Ensure bold text is preserved
+          
+          // Section formatting
+          .replace(/\n(.*?:)\s*\n/g, "\n\n**$1**\n\n") // Format section titles with colons
+          
+          // Final cleanup
           .replace(/\n{3,}/g, "\n\n") // Prevent excessive blank lines
-          .replace(/(\d+\.\s)(?=\d+\.)/g, "$1\n") // Fix numbering consistency (1. → 2.)
-          .replace(/(Health Benefits|Nutritional Profile|Botanical Information):/g, "\n\n---\n**$1:**\n\n") // Ensure major section spacing with a line break
-          .replace(/- (.+?):/g, "\n- **$1:**") // Ensure key points in bullets are bold
-          .replace(/(\n\n)(?=-)/g, "\n") // Prevent excessive spacing before bullet points
-          .replace(/(\n\n)(?=\d+\.)/g, "\n") // Prevent excessive spacing before numbered lists
           .trim();
     
         setMessages((prev) => {
@@ -195,9 +195,9 @@ const Chat = () => {
       
       if (error instanceof Error) {
         if (error.message.includes("NetworkError") || error.message.includes("Failed to fetch")) {
-          errorMessage = "Connection error: Unable to reach the API server. Please check that the backend is running at http://localhost:5000.";
+          errorMessage = "Connection error: Unable to reach the API server.";
         } else if (error.message.includes("CORS")) {
-          errorMessage = "CORS error: The API server is not accepting requests from this origin. This is a configuration issue with the API.";
+          errorMessage = "CORS error: The API server is not accepting requests from this origin.";
         } else if (error.message.includes("429")) {
           errorMessage = "Rate limit reached: The semantic scholar API has temporarily limited requests. Please wait a moment and try again.";
         }
@@ -207,7 +207,7 @@ const Chat = () => {
         const updated = [...prev];
         // Check if the last message is a loading message
         if (updated.length > 0 && updated[updated.length - 1].role === "assistant" && 
-            updated[updated.length - 1].content === "Researching...") {
+            updated[updated.length - 1].content === "...") {
           // Replace loading message with error
           updated[updated.length - 1] = {
             role: "assistant", 
@@ -215,97 +215,6 @@ const Chat = () => {
           };
         } else {
           // Add new error message
-          updated.push({
-            role: "assistant",
-            content: errorMessage
-          });
-        }
-        return updated;
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Direct message to AI without research, for testing connection
-  const sendDirectMessage = async () => {
-    if (!input.trim() || isLoading) return;
-    
-    setIsLoading(true);
-    const userMessage = input;
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-    setInput(""); // Clear input immediately
-    
-    try {
-      // Show a temporary loading message
-      setMessages((prev) => [...prev, { role: "assistant", content: "Thinking..." }]);
-      
-      const generateResponse = await fetch("http://localhost:5000/api/generate", {
-        method: "POST",
-        mode: "cors", // Add CORS mode explicitly
-        credentials: "omit", // Don't send cookies
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "text/event-stream",
-        },
-        body: JSON.stringify({
-          role: "user",
-          model: "deepseek/deepseek-chat:free",
-          content: userMessage
-        }),
-      });
-    
-      if (!generateResponse.body) throw new Error("Readable stream not supported!");
-    
-      // Replace the loading message with an empty message that will be filled
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = { role: "assistant", content: "" };
-        return updated;
-      });
-    
-      const reader = generateResponse.body.getReader();
-      const decoder = new TextDecoder();
-      let newMessage = "";
-    
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-    
-        const chunk = decoder.decode(value, { stream: true });
-        newMessage += chunk;
-    
-        setMessages((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            role: "assistant",
-            content: newMessage.trim(),
-          };
-          return updated;
-        });
-      }
-    } catch (error) {
-      console.error("Error in direct message:", error);
-      
-      let errorMessage = "I'm sorry, I encountered an error. Please try again.";
-      
-      if (error instanceof Error) {
-        if (error.message.includes("NetworkError") || error.message.includes("Failed to fetch")) {
-          errorMessage = "Connection error: Unable to reach the API server. Please check that the backend is running at http://localhost:5000.";
-        } else if (error.message.includes("CORS")) {
-          errorMessage = "CORS error: The API server is not accepting requests from this origin. This is a configuration issue with the API.";
-        }
-      }
-      
-      setMessages((prev) => {
-        const updated = [...prev];
-        if (updated.length > 0 && updated[updated.length - 1].role === "assistant" && 
-            updated[updated.length - 1].content === "Thinking...") {
-          updated[updated.length - 1] = {
-            role: "assistant", 
-            content: errorMessage
-          };
-        } else {
           updated.push({
             role: "assistant",
             content: errorMessage
@@ -345,7 +254,6 @@ const Chat = () => {
         input={input} 
         setInput={setInput} 
         sendMessage={sendMessage}
-        // sendDirectMessage={sendDirectMessage}
         isLoading={isLoading}
       />
     </div>
