@@ -1,0 +1,34 @@
+terry@Terrys-Macbook-Air neuro % curl -X POST http://localhost:5000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"role": "user", "model": "deepseek/deepseek-chat:free", "content": "Tell me about COVID-19"}'
+Certainly! Here’s an accurate and concise overview of COVID-19 based on current scientific understanding:
+
+### **What is COVID-19?**
+COVID-19 (Coronavirus Disease 2019) is an infectious disease caused by the **SARS-CoV-2 virus**, a novel coronavirus first identified in Wuhan, China, in December 2019. It belongs to the family of coronaviruses, which includes viruses responsible for diseases like the common cold, SARS (Severe Acute Respiratory Syndrome), and MERS (Middle East Respiratory Syndrome).
+
+### **Transmission**
+SARS-CoV-2 primarily spreads through:
+- **Respiratory droplets** (e.g., from coughing, sneezing, or talking).
+- **Aerosols** (smaller particles that can linger in the air, especially in poorly ventilated spaces).
+- **Surface contact** (touching contaminated surfaces and then touching the face).
+
+### **Symptoms**
+Symptoms range from mild to severe and typically appear 2–14 days after exposure. Common symptoms include:
+- Fever or chills
+- Cough
+- Shortness of breath or difficulty breathing
+- Fatigue
+- Muscle or body aches
+- Loss of taste or smell
+- Sore throat
+- Congestion or runny nose
+- Nausea or vomiting
+- Diarrhea
+
+Severe cases can lead to **pneumonia**, **acute respiratory distress syndrome (ARDS)**, **multi-organ failure**, and **death**, particularly in older adults and individuals with underlying health conditions.
+
+### **Variants**
+SARS-CoV-2 has evolved into multiple variants, some of which are classified as **Variants of Concern (VOCs)** due to increased transmissibility, severity, or immune evasion. Notable variants include:
+- Alpha (B.1.1.7)
+- Beta (B.1.351)
+- Gamma (P.1)
