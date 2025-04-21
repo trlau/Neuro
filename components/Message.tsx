@@ -7,6 +7,30 @@ interface MessageProps {
 }
 
 const Message: React.FC<MessageProps> = ({ role, content }) => {
+  // Handle loading state specially
+  if (role === "assistant" && content === "...") {
+    return (
+      <div className="w-full flex justify-start mb-6">
+        <div className="w-full">
+          <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-blue-500/50">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-100"></div>
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-200"></div>
+              <span className="text-gray-400">Researching...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Error messages should be styled differently
+  const isErrorMessage = role === "assistant" && 
+    (content.includes("Connection error") || 
+     content.includes("CORS error") || 
+     content.includes("Rate limit"));
+
   return (
     <div className={`w-full flex ${role === "user" ? "justify-end mb-4" : "justify-start mb-6"}`}>
       {role === "user" ? (
@@ -17,7 +41,9 @@ const Message: React.FC<MessageProps> = ({ role, content }) => {
       ) : (
         // AI response container with improved styling
         <div className="w-full">
-          <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-blue-500/50">
+          <div className={`p-4 rounded-lg border-l-4 ${
+            isErrorMessage ? 'bg-red-900/20 border-red-500/50' : 'bg-gray-800/50 border-blue-500/50'
+          }`}>
             <ReactMarkdown
               components={{
                 p: ({ children }) => <p className="mb-3 text-gray-300 leading-relaxed">{children}</p>,

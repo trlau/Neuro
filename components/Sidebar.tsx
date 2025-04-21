@@ -14,10 +14,16 @@ import {
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-const Sidebar = ({ onSelectChat }: { onSelectChat: (id: string) => void }) => {
+interface SidebarProps {
+  onSelectChat: (id: string) => void;
+  selectedChatId?: string | null;
+}
+
+const Sidebar = ({ onSelectChat, selectedChatId }: SidebarProps) => {
   const router = useRouter();
   const [chats, setChats] = useState<{ id: string; title: string }[]>([]);
   const [user] = useAuthState(auth);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch user-specific chat history
   useEffect(() => {
@@ -43,26 +49,47 @@ const Sidebar = ({ onSelectChat }: { onSelectChat: (id: string) => void }) => {
 
   // Handle creating a new chat
   const createNewChat = async () => {
-    if (!user) return;
+    if (!user || isLoading) return;
+    
+    try {
+      setIsLoading(true);
+      
+      const docRef = await addDoc(collection(db, "chats"), {
+        title: "New Chat",
+        userId: user.uid,
+        timestamp: serverTimestamp(),
+      });
 
-    const docRef = await addDoc(collection(db, "chats"), {
-      title: "Untitled Chat",
-      userId: user.uid,
-      timestamp: serverTimestamp(),
-    });
+      onSelectChat(docRef.id);
+      
+      // Use shallow routing to prevent full page refreshes
+      router.push(`/chat?id=${docRef.id}`, undefined, { shallow: true });
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    onSelectChat(docRef.id);
-    router.push("/chat");
+  // Handle logout with safe navigation
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (
     <div className="w-72 h-screen bg-gray-900 text-gray-200 flex flex-col p-4 border-r border-gray-800">
       {/* New Chat Button */}
       <button
-        className="flex items-center gap-2 w-full px-4 py-3 text-left bg-gray-800 hover:bg-gray-700 rounded-lg transition"
+        className={`flex items-center gap-2 w-full px-4 py-3 text-left bg-gray-800 hover:bg-gray-700 rounded-lg transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         onClick={createNewChat}
+        disabled={isLoading}
       >
-        <Plus size={18} /> New Chat
+        <Plus size={18} /> {isLoading ? "Creating..." : "New Chat"}
       </button>
 
       {/* Chat History */}
@@ -74,7 +101,9 @@ const Sidebar = ({ onSelectChat }: { onSelectChat: (id: string) => void }) => {
           <button
             key={chat.id}
             onClick={() => onSelectChat(chat.id)}
-            className="w-full flex items-center px-4 py-3 text-left rounded-lg bg-gray-850 hover:bg-gray-700 transition"
+            className={`w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-700 transition ${
+              selectedChatId === chat.id ? 'bg-blue-800/30 border-l-4 border-blue-500' : 'bg-gray-850'
+            }`}
           >
             {chat.title}
           </button>
@@ -92,7 +121,7 @@ const Sidebar = ({ onSelectChat }: { onSelectChat: (id: string) => void }) => {
 
         <button
           className="flex items-center w-full px-4 py-3 gap-2 text-left rounded-lg hover:bg-gray-800 transition"
-          onClick={() => {logout();router.push("/login")}}
+          onClick={handleLogout}
         >
           <LogOut size={18} /> Logout
         </button>
