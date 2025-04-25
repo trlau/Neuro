@@ -68,6 +68,7 @@ const Chat = ({ chatId }: ChatProps) => {
         },
         body: JSON.stringify({
           role: "user",
+          //model: "microsoft/mai-ds-r1:free",
           model: "deepseek/deepseek-chat:free",
           content: userMessage
         }),
@@ -118,12 +119,12 @@ const Chat = ({ chatId }: ChatProps) => {
         const paperLimit = Math.min(paperData.length, 3);
         for (let i = 0; i < paperLimit; i++) {
           const paper = paperData[i];
-          enhancedInput += `Paper ${i+1}: "${paper.Title || 'Untitled'}"\n`;
+          enhancedInput += `Paper ${i+1}: "${paper.title || 'Untitled'}"\n`;
           if (paper.Abstract) {
-            enhancedInput += `Abstract: ${paper.Abstract.substring(0, 200)}...\n`;
+            enhancedInput += `Abstract: ${paper.abstract.substring(0, 200)}...\n`;
           }
-          if (paper.Url) {
-            enhancedInput += `URL: ${paper.Url}\n`;
+          if (paper.Url || paper.openAccessPDF.url) {
+            enhancedInput += `URL: ${paper.url || paper.openAccessPDF.url}\n`;
           }
           enhancedInput += "\n";
         }
