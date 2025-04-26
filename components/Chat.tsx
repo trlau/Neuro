@@ -1,18 +1,32 @@
 import { useState, useRef, useEffect } from "react";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
-
+import { doc, addDoc, setDoc, getDoc, collection, serverTimestamp, arrayUnion } from "firebase/firestore";
+import { auth, db } from "../lib/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { User } from "firebase/auth";
+import { useRouter } from "next/router";
 type ChatProps = {
   chatId: string | null;
 };
 
 const Chat = ({ chatId }: ChatProps) => {
+  const [user, loading] = useAuthState(auth);
+  const router = useRouter();
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState<"checking" | "connected" | "error">("checking");
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    
+    loadAllMessages();
+
+    
+  }, [])
+
+  
   // Check API connectivity on component mount
   useEffect(() => {
     const checkApiConnection = async () => {
@@ -39,23 +53,76 @@ const Chat = ({ chatId }: ChatProps) => {
     };
     
     checkApiConnection();
+    
   }, []);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  async function setChatTitle(chatId: string, newTitle : string) {
+    await setDoc(doc(db, "chats", chatId), {
+      title: newTitle
+    }, {merge: true})
+  }
+
+  async function loadAllMessages() {
+    if (chatId) {
+      const docRef = doc(db, "chats", chatId);
+      const docChats = await getDoc(docRef);
+
+      if (docChats.exists() && docChats.data()["chats"] != null) {
+        const chats = docChats.data()["chats"] as string[];
+        chats.map((item : any) => {
+          setMessages((prev) => [...prev, { role: item["role"], content: item["message"] }]);
+        })
+      }
+    }
+    
+  }
+  async function setChatMessage(chatId: string, role: string, message: string) {
+    await setDoc(doc(db, "chats", chatId), {
+      chats: arrayUnion({
+        "role": role,
+        "message": message
+      })
+    }, {merge: true})
+  }
+
+  async function createNewChat(userMessage : string) {
+    const current_user = user as User;
+    const docRef = await addDoc(collection(db, "chats"), {
+      title: userMessage,
+      userId: current_user.uid,
+      timestamp: serverTimestamp(),
+    });
+    router.push(`chat?id=${docRef.id}`);
+    return docRef.id;
+  }
+        
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
     
     setIsLoading(true);
     const userMessage = input;
+    
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    if (!chatId) {
+      chatId = await createNewChat(userMessage)
+    }
+    else {
+      await setChatTitle(chatId as string, userMessage);
+    }
+
+    await setChatMessage(chatId as string, "user", userMessage);
+    
     setInput(""); // Clear input immediately
 
     try {
       // Show a temporary loading message immediately
       setMessages((prev) => [...prev, { role: "assistant", content: "..." }]);
+
+      
       
       // Step 1: Get search keywords from user input
       console.log("Sending request to /api/source...");
@@ -119,11 +186,11 @@ const Chat = ({ chatId }: ChatProps) => {
         const paperLimit = Math.min(paperData.length, 3);
         for (let i = 0; i < paperLimit; i++) {
           const paper = paperData[i];
-          enhancedInput += `Paper ${i+1}: "${paper.title || 'Untitled'}"\n`;
-          if (paper.Abstract) {
+          enhancedInput += `Paper ${i+1}: \'${paper.title || 'Untitled'}\'\n`;
+          if (paper.abstract) {
             enhancedInput += `Abstract: ${paper.abstract.substring(0, 200)}...\n`;
           }
-          if (paper.Url || paper.openAccessPDF.url) {
+          if (paper.url || paper.openAccessPDF.url) {
             enhancedInput += `URL: ${paper.url || paper.openAccessPDF.url}\n`;
           }
           enhancedInput += "\n";
@@ -204,6 +271,7 @@ const Chat = ({ chatId }: ChatProps) => {
           return updated;
         });
       }
+      await setChatMessage(chatId as string, "assistant", newMessage);
     } catch (error) {
       console.error("Error in research process:", error);
       

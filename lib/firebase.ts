@@ -22,7 +22,9 @@ const githubProvider = new GithubAuthProvider();
 
 const loginWithGoogle = async () => {
   try {
-    await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, googleProvider);
+    if (result.user) {
+    }
   } catch (error) {
     console.error("Google Login failed:", error);
   }

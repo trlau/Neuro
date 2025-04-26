@@ -63,7 +63,8 @@ const Sidebar = ({ onSelectChat, selectedChatId }: SidebarProps) => {
       onSelectChat(docRef.id);
       
       // Use shallow routing to prevent full page refreshes
-      router.push(`/chat?id=${docRef.id}`, undefined, { shallow: true });
+      console.log(docRef.id);
+      await router.push(`/chat?id=${docRef.id}`, undefined, { shallow: false });
     } catch (error) {
       console.error("Error creating new chat:", error);
     } finally {
