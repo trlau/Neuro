@@ -18,43 +18,6 @@ const Chat = ({ chatId }: ChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState<"checking" | "connected" | "error">("checking");
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const [lastNavigationTime, setLastNavigationTime] = useState(0);
-
-  useEffect(() => {
-    const checkApiConnection = async () => {
-      try {
-        const response = await fetch("http://localhost:5000", {
-          method: "GET",
-          mode: "cors",
-          headers: {
-            "Accept": "application/json"
-          }
-        });
-        response.ok ? setApiStatus("connected") : setApiStatus("error");
-      } catch (error) {
-        setApiStatus("error");
-      }
-    };
-    checkApiConnection();
-  }, []);
-
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => {
-    if (chatId && messages.length > 0) {
-      const now = Date.now();
-      if (now - lastNavigationTime > 1000) {
-        try {
-          window.history.replaceState({}, '', `/chat/${chatId}`);
-          setLastNavigationTime(now);
-        } catch (err) {
-          console.warn("History replace failed:", err);
-        }
-      }
-    }
-  }, [chatId, messages.length]);
 
   useEffect(() => {
     
@@ -191,8 +154,7 @@ const Chat = ({ chatId }: ChatProps) => {
       if (keywords && keywords.trim()) {
         console.log("Sending request to /api/paper/search...");
         try {
-          const cleanQuery = keywords.trim().replace(/^"(.*)"$/, "$1"); // removes quotes
-          const encodedQuery = encodeURIComponent(cleanQuery);
+          const encodedQuery = encodeURIComponent(keywords.trim());
           const paperSearchResponse = await fetch(`http://localhost:5000/api/paper/search?query=${encodedQuery}`, {
             method: "GET",
             mode: "cors",
@@ -318,13 +280,11 @@ const Chat = ({ chatId }: ChatProps) => {
       
       if (error instanceof Error) {
         if (error.message.includes("NetworkError") || error.message.includes("Failed to fetch")) {
-          errorMessage = "Connection error: Unable to reach the API server. Please make sure the backend is running at http://localhost:5000.";
+          errorMessage = "Connection error: Unable to reach the API server. Please make sure the backend is running.";
         } else if (error.message.includes("CORS")) {
-          errorMessage = "CORS error: The API server is not configured to accept requests from this origin. Please check CORS settings in the API.";
+          errorMessage = "CORS error: The API server is not accepting requests from this origin.";
         } else if (error.message.includes("429")) {
-          errorMessage = "Rate limit reached: The Semantic Scholar API has temporarily limited requests. Please wait a moment and try again.";
-        } else if (error.message.includes("500")) {
-          errorMessage = "Server error: The API encountered an internal error. Check the backend logs for details.";
+          errorMessage = "Rate limit reached: The semantic scholar API has temporarily limited requests. Please wait a moment and try again.";
         }
       }
       
