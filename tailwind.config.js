@@ -6,11 +6,9 @@ module.exports = {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: [
-  				'Inter',
-                    ...defaultTheme.fontFamily.sans
-                ]
-  		},
+			sans: ["Inter", "sans-serif"],
+			},
+		plugins: [require("@tailwindcss/typography")],
   		colors: {
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
