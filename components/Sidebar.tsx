@@ -1,8 +1,9 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Plus, LogOut, Settings } from "lucide-react";
-import { db, auth } from "../lib/firebase";
-import { logout } from "../lib/firebase";
+import { db, auth, logout } from "../lib/firebase";
+import { LogOut, Settings, Search, Book, MessageSquarePlus, PanelLeftClose, FileText } from "lucide-react";
 import {
   collection,
   query,
@@ -13,25 +14,29 @@ import {
   where,
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { SettingsDialog } from "../components/SettingsDialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
   onSelectChat: (id: string) => void;
   selectedChatId?: string | null;
 }
 
-const Sidebar = ({ onSelectChat, selectedChatId }: SidebarProps) => {
+export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) {
   const router = useRouter();
   const [chats, setChats] = useState<{ id: string; title: string }[]>([]);
   const [user] = useAuthState(auth);
   const [isLoading, setIsLoading] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
-  // Fetch user-specific chat history
   useEffect(() => {
     if (!user) return;
 
     const q = query(
       collection(db, "chats"),
-      where("userId", "==", user.uid), // Fetch only the logged-in user's chats
+      where("userId", "==", user.uid),
       orderBy("timestamp", "desc")
     );
 
@@ -39,7 +44,7 @@ const Sidebar = ({ onSelectChat, selectedChatId }: SidebarProps) => {
       setChats(
         snapshot.docs.map((doc) => ({
           id: doc.id,
-          title: doc.data().title || "New Chat", // Fetch chat titles
+          title: doc.data().title || "New Chat",
         }))
       );
     });
@@ -47,13 +52,10 @@ const Sidebar = ({ onSelectChat, selectedChatId }: SidebarProps) => {
     return () => unsubscribe();
   }, [user]);
 
-  // Handle creating a new chat
   const createNewChat = async () => {
     if (!user || isLoading) return;
-    
     try {
       setIsLoading(true);
-      
       const docRef = await addDoc(collection(db, "chats"), {
         title: "New Chat",
         userId: user.uid,
@@ -61,9 +63,6 @@ const Sidebar = ({ onSelectChat, selectedChatId }: SidebarProps) => {
       });
 
       onSelectChat(docRef.id);
-      
-      // Use shallow routing to prevent full page refreshes
-      console.log(docRef.id);
       await router.push(`/chat?id=${docRef.id}`, undefined, { shallow: false });
     } catch (error) {
       console.error("Error creating new chat:", error);
@@ -72,7 +71,6 @@ const Sidebar = ({ onSelectChat, selectedChatId }: SidebarProps) => {
     }
   };
 
-  // Handle logout with safe navigation
   const handleLogout = async () => {
     try {
       await logout();
@@ -83,52 +81,137 @@ const Sidebar = ({ onSelectChat, selectedChatId }: SidebarProps) => {
   };
 
   return (
-    <div className="w-72 h-screen bg-gray-900 text-gray-200 flex flex-col p-4 border-r border-gray-800">
-      {/* New Chat Button */}
-      <button
-        className={`flex items-center gap-2 w-full px-4 py-3 text-left bg-gray-800 hover:bg-gray-700 rounded-lg transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        onClick={createNewChat}
-        disabled={isLoading}
-      >
-        <Plus size={18} /> {isLoading ? "Creating..." : "New Chat"}
-      </button>
-
-      {/* Chat History */}
-      <div className="flex-grow mt-4 space-y-2 overflow-y-auto">
-        {chats.length === 0 && (
-          <p className="text-gray-500 text-sm text-center mt-4">No chats yet</p>
-        )}
-        {chats.map((chat) => (
-          <button
-            key={chat.id}
-            onClick={() => onSelectChat(chat.id)}
-            className={`w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-700 transition ${
-              selectedChatId === chat.id ? 'bg-blue-800/30 border-l-4 border-blue-500' : 'bg-gray-850'
-            }`}
-          >
-            {chat.title}
-          </button>
-        ))}
-      </div>
-
-      {/* Bottom Section */}
-      <div className="border-t border-gray-800 pt-4">
-        <button
-          className="flex items-center w-full px-4 py-3 gap-2 text-left rounded-lg hover:bg-gray-800 transition"
-          onClick={() => console.log("Open Settings")}
+    <>
+      <TooltipProvider>
+        <aside
+          className={`flex h-screen flex-col bg-gray-900 border-r border-gray-800 p-4 text-gray-200 shadow-inner transition-all duration-300 ${
+            collapsed ? "w-16" : "w-72"
+          }`}
         >
-          <Settings size={18} /> Settings
-        </button>
+          {/* Top Icon Buttons */}
+          <div className="flex items-center justify-between pb-4">
+            {/* Collapse Sidebar */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setCollapsed(!collapsed)}
+                  className="rounded-md p-2 hover:bg-gray-800 transition"
+                >
+                  <PanelLeftClose size={20} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
+                <p>{collapsed ? "Expand Sidebar" : "Collapse Sidebar"}</p>
+              </TooltipContent>
+            </Tooltip>
 
-        <button
-          className="flex items-center w-full px-4 py-3 gap-2 text-left rounded-lg hover:bg-gray-800 transition"
-          onClick={handleLogout}
-        >
-          <LogOut size={18} /> Logout
-        </button>
-      </div>
-    </div>
+            {/* Citation Generator */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => console.log("Citation Generator clicked")}
+                  className="rounded-md p-2 hover:bg-gray-800 transition"
+                >
+                  <FileText size={20} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
+                <p>Citation Generator</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Search */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => console.log("Search clicked")}
+                  className="rounded-md p-2 hover:bg-gray-800 transition"
+                >
+                  <Search size={20} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
+                <p>Search Chats</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* New Chat */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={createNewChat}
+                  disabled={isLoading}
+                  className="rounded-md p-2 hover:bg-gray-800 transition"
+                >
+                  <MessageSquarePlus size={20} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
+                <p>New Chat</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          {/* Chat List */}
+          {!collapsed && (
+            <nav className="flex-1 overflow-y-auto space-y-1">
+              {chats.length === 0 ? (
+                <div className="text-center text-sm text-gray-500 mt-10">
+                  No chats yet
+                </div>
+              ) : (
+                chats.map((chat) => (
+                  <button
+                    key={chat.id}
+                    onClick={() => onSelectChat(chat.id)}
+                    className={`flex w-full items-center rounded-md px-3 py-2 text-sm transition ${
+                      selectedChatId === chat.id
+                        ? "bg-blue-800/40 border-l-4 border-blue-500 font-semibold text-white"
+                        : "hover:bg-gray-800 text-gray-300"
+                    }`}
+                  >
+                    {chat.title}
+                  </button>
+                ))
+              )}
+            </nav>
+          )}
+
+          {/* Bottom Buttons */}
+          <div className="mt-6 border-t border-gray-800 pt-4 space-y-2">
+            {!collapsed && (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/docs")}
+                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                >
+                  <Book size={18} /> User Guide
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => setSettingsOpen(true)}
+                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                >
+                <Settings size={18} /> Settings
+              </Button>
+
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+              >
+                <LogOut size={18} /> Logout
+              </Button>
+            </>
+          )}
+        </div>
+        </aside>
+      </TooltipProvider>
+
+      {/* Proper SettingsDialog */}
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+    </>
   );
-};
-
-export default Sidebar;
+}
