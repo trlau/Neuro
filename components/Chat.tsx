@@ -6,8 +6,18 @@ import { auth, db } from "../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { User } from "firebase/auth";
 import { useRouter } from "next/router";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel,DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ChevronDown } from "lucide-react";
+
 type ChatProps = {
   chatId: string | null;
+};
+
+type ModelType = {
+  name: string;
+  description: string;
+  apiId: string;
 };
 
 const Chat = ({ chatId }: ChatProps) => {
@@ -18,15 +28,34 @@ const Chat = ({ chatId }: ChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState<"checking" | "connected" | "error">("checking");
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // Define available models
+  const models: ModelType[] = [
+    {
+      name: "Deepseek v4",
+      description: "High performance open-source model with research specialization",
+      apiId: "deepseek/deepseek-chat:free"
+    },
+    {
+      name: "ChatGPT 4",
+      description: "OpenAI's advanced multimodal model",
+      apiId: "deepseek/deepseek-chat:free"
+    },
+    {
+      name: "Claude 3.7",
+      description: "Anthropic's cutting-edge assistant with research capabilities",
+      apiId: "deepseek/deepseek-chat:free"
+    }
+  ];
+  
+  // Selected model state
+  const [selectedModel, setSelectedModel] = useState<ModelType>(models[0]);
+  const [showModelInfo, setShowModelInfo] = useState<string | null>(null);
 
   useEffect(() => {
-    
     loadAllMessages();
-
-    
   }, [])
 
-  
   // Check API connectivity on component mount
   useEffect(() => {
     const checkApiConnection = async () => {
@@ -53,7 +82,6 @@ const Chat = ({ chatId }: ChatProps) => {
     };
     
     checkApiConnection();
-    
   }, []);
 
   useEffect(() => {
@@ -78,8 +106,8 @@ const Chat = ({ chatId }: ChatProps) => {
         })
       }
     }
-    
   }
+  
   async function setChatMessage(chatId: string, role: string, message: string) {
     await setDoc(doc(db, "chats", chatId), {
       chats: arrayUnion({
@@ -121,8 +149,6 @@ const Chat = ({ chatId }: ChatProps) => {
     try {
       // Show a temporary loading message immediately
       setMessages((prev) => [...prev, { role: "assistant", content: "..." }]);
-
-      
       
       // Step 1: Get search keywords from user input
       console.log("Sending request to /api/source...");
@@ -135,8 +161,7 @@ const Chat = ({ chatId }: ChatProps) => {
         },
         body: JSON.stringify({
           role: "user",
-          //model: "microsoft/mai-ds-r1:free",
-          model: "deepseek/deepseek-chat:free",
+          model: selectedModel.apiId, // Use the selected model ID
           content: userMessage
         }),
       });
@@ -208,7 +233,7 @@ const Chat = ({ chatId }: ChatProps) => {
         },
         body: JSON.stringify({
           role: "user",
-          model: "deepseek/deepseek-chat:free",
+          model: selectedModel.apiId, // Use the selected model ID
           content: enhancedInput
         }),
       });
@@ -349,7 +374,36 @@ Note: This is offline information. For the latest updates, please check with rep
   return (
     <div className="flex flex-col h-full w-full bg-gray-900 text-white">
       <div className="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-        <h1 className="text-xl font-semibold">Neuro AI Research Assistant</h1>
+        <div className="flex items-center relative">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-1.5 text-l font-semibold focus:outline-none">
+              {selectedModel.name}
+              <ChevronDown className="h-4 w-4 opacity-70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-gray-900 border border-gray-700 rounded-md p-1 min-w-[200px]">
+              {models.map((model) => (
+                <div key={model.name} className="relative">
+                  <DropdownMenuItem 
+                    className={`px-3 py-2 cursor-pointer rounded ${selectedModel.name === model.name ? 'bg-gray-800' : 'hover:bg-gray-800'}`}
+                    onClick={() => {
+                      setSelectedModel(model);
+                      setShowModelInfo(model.name);
+                      // Hide the info after 3 seconds
+                      setTimeout(() => setShowModelInfo(null), 3000);
+                    }}
+                  >
+                    {model.name}
+                  </DropdownMenuItem>
+                  {showModelInfo === model.name && (
+                    <div className="absolute left-full ml-2 top-0 bg-black text-white p-2 rounded shadow-md text-sm z-10 whitespace-nowrap">
+                      {model.description}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         {apiStatus === "checking" && (
           <span className="text-yellow-400 text-sm">Checking API connection...</span>
         )}
