@@ -88,8 +88,19 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
             collapsed ? "w-16" : "w-72"
           }`}
         >
-          {/* Top Icon Buttons */}
-          <div className="flex items-center justify-between pb-4">
+        {/* Top: "Neuro" Logo */}
+        <div className="flex items-center justify-center pb-6">
+          <button
+            onClick={() => router.push("/")}
+            className="text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition"
+          >
+            Neuro
+          </button>
+        </div>
+
+        {/* Top Icon Buttons */}
+        <div className="flex items-center justify-between pb-4">
+
             {/* Collapse Sidebar */}
             <Tooltip>
               <TooltipTrigger asChild>
