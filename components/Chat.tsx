@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import Message from "./Message";
-import MessageInput from "./MessageInput";
+import Message from "./chat/Message";
+import MessageInput from "./chat/MessageInput";
 import { doc, addDoc, setDoc, getDoc, collection, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { User } from "firebase/auth";
 import { useRouter } from "next/router";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel,DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel,DropdownMenuSeparator } from "./ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { ChevronDown } from "lucide-react";
 
 type ChatProps = {
@@ -29,7 +29,7 @@ const Chat = ({ chatId }: ChatProps) => {
   const [apiStatus, setApiStatus] = useState<"checking" | "connected" | "error">("checking");
   const chatEndRef = useRef<HTMLDivElement>(null);
   
-  // Define available models
+  // define models
   const models: ModelType[] = [
     {
       name: "Deepseek v4",

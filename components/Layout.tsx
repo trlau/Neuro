@@ -1,5 +1,5 @@
 import Sidebar from "./Sidebar";
-import Chat from "./Chat";
+import { Chat } from "./../components/chat/Chat";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
