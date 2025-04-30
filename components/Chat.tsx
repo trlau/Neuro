@@ -5,7 +5,10 @@ import { doc, addDoc, setDoc, getDoc, collection, serverTimestamp, arrayUnion } 
 import { auth, db } from "../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { User } from "firebase/auth";
+import TypeWriter from "./motion/TypeWriter";
 import { useRouter } from "next/router";
+import LoadingThreeDotsJumping from "./motion/LoadingDots";
+import {Cursor} from "motion-plus-react"
 type ChatProps = {
   chatId: string | null;
 };
@@ -15,6 +18,7 @@ const Chat = ({ chatId }: ChatProps) => {
   const router = useRouter();
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
+  const [isPreloaded, setIsPreloaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState<"checking" | "connected" | "error">("checking");
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -78,6 +82,8 @@ const Chat = ({ chatId }: ChatProps) => {
         })
       }
     }
+
+    setIsPreloaded(true);
     
   }
   async function setChatMessage(chatId: string, role: string, message: string) {
@@ -121,7 +127,6 @@ const Chat = ({ chatId }: ChatProps) => {
     try {
       // Show a temporary loading message immediately
       setMessages((prev) => [...prev, { role: "assistant", content: "..." }]);
-
       
       
       // Step 1: Get search keywords from user input
@@ -360,9 +365,13 @@ Note: This is offline information. For the latest updates, please check with rep
           <span className="text-red-400 text-sm">API Connection Error ✗</span>
         )}
       </div>
+      
 
       <div className="flex-grow overflow-y-auto p-4">
-        {messages.length === 0 && <p className="text-gray-500 text-center mt-10">Start a conversation with your research assistant...</p>}
+        <div className="flex justify-center">
+        {messages.length === 0 && isPreloaded && <p className="text-gray-500 text-center w-fit mt-10"><TypeWriter text="Start a conversation with your research assistant..."/></p>}
+        </div>
+        
         {messages.map((msg, index) => (
           <Message key={index} role={msg.role} content={msg.content} />
         ))}
