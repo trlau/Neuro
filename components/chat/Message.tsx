@@ -1,5 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import SplitText from "../motion/SplitText";
 
 interface MessageProps {
   role: string;

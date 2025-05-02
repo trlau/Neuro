@@ -34,6 +34,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
   const {
     messages,
     setMessages,
+    isPreloaded,
     input,
     setInput,
     isLoading,
@@ -138,7 +139,8 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
       )}
 
       <div className="flex-grow overflow-y-auto p-4">
-        {messages.length === 0 ? (
+        {isPreloaded && <div></div>}
+        {messages.length === 0 && !isPreloaded ? (
           <EmptyState
             greeting={greeting}
             onStartResearch={startResearchTopic}

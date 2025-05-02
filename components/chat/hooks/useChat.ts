@@ -24,6 +24,7 @@ export const useChat = (initialChatId: string | null) => {
 
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [input, setInput] = useState<string>("");
+  const [isPreloaded, setIsPreloaded] = useState(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [greeting, setGreeting] = useState<string>("");
   const [model, setModel] = useState<string>("deepseek/deepseek-chat:free");
@@ -44,7 +45,7 @@ export const useChat = (initialChatId: string | null) => {
   // Load existing messages on mount
   useEffect(() => {
     const loadAllMessages = async () => {
-      if (!initialChatId) return;
+      if (!initialChatId) return setIsPreloaded(false);;
       const ref = doc(db, "chats", initialChatId);
       const snap = await getDoc(ref);
       if (snap.exists()) {
@@ -58,6 +59,7 @@ export const useChat = (initialChatId: string | null) => {
           }))
         );
       }
+      setIsPreloaded(false);
     };
     loadAllMessages();
   }, [initialChatId]);
@@ -169,6 +171,7 @@ export const useChat = (initialChatId: string | null) => {
     setMessages,
     input,
     setInput,
+    isPreloaded,
     isLoading,
     setIsLoading,
     greeting,
