@@ -1,6 +1,8 @@
 // File: components/chat/Chat.tsx
 import React, { useState, useRef, useEffect } from "react";
+import jsPDF from "jspdf";
 import { useRouter } from "next/router";
+
 import Message from "./Message";
 import MessageInput from "./MessageInput";
 import { ChatHeader } from "./components/ChatHeader";
@@ -10,7 +12,7 @@ import { PdfViewer } from "./components/PdfViewer";
 import { ModelType } from "./types";
 import { useChat } from "./hooks/useChat";
 import { useApi } from "./hooks/useApi";
-import { generateCitations, exportSession } from "./utils/chatUtils";
+import { generateCitations } from "./utils/chatUtils";
 
 const models: ModelType[] = [
   {
@@ -60,15 +62,15 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Send / persist flow
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
     setIsLoading(true);
 
     const userMessage = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
 
-    // Create or title the chat
     let currentChatId = chatId;
     if (!currentChatId) {
       currentChatId = await createNewChat(userMessage);
@@ -76,14 +78,10 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
       await setChatTitle(currentChatId, userMessage);
     }
 
-    // Persist user message
     await setChatMessage(currentChatId, "user", userMessage);
-
-    // Show loading indicator
-    setMessages((prev) => [...prev, { role: "assistant", content: "..." }]);
+    setMessages(prev => [...prev, { role: "assistant", content: "..." }]);
 
     try {
-      // Run the research pipeline
       const raw = await processResearchQuery(
         selectedModel.apiId,
         userMessage,
@@ -91,22 +89,18 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
         setInput,
         setIsLoading
       );
-
-      // Persist and display assistant response
       await setChatMessage(currentChatId, "assistant", raw);
-      setMessages((prev) => {
+      setMessages(prev => {
         const copy = [...prev];
         copy[copy.length - 1] = { role: "assistant", content: raw };
         return copy;
       });
     } catch {
-      // Show error in last slot
-      setMessages((prev) => {
+      setMessages(prev => {
         const copy = [...prev];
         copy[copy.length - 1] = {
           role: "assistant",
-          content:
-            "I'm sorry, I encountered an error while processing your request.",
+          content: "I'm sorry, I encountered an error while processing your request."
         };
         return copy;
       });
@@ -115,9 +109,37 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
     }
   };
 
+  // PDF Viewer
   const openPdfViewer = (url: string) => {
     setCurrentPdfUrl(url);
     setPdfViewerOpen(true);
+  };
+
+  // PDF Exporter logic
+  const handleExportPDF = () => {
+    const pdf = new jsPDF();
+    let y = 20;
+    const pageHeight = pdf.internal.pageSize.height;
+    messages.forEach(msg => {
+      const prefix = msg.role === 'user' ? 'User: ' : 'Assistant: ';
+      const text = prefix + msg.content;
+      const lines = pdf.splitTextToSize(text, pdf.internal.pageSize.width - 20);
+      lines.forEach((line: string | string[]) => {
+        if (y > pageHeight - 20) {
+          pdf.addPage();
+          y = 20;
+        }
+        pdf.text(line, 10, y);
+        y += 10;
+      });
+      y += 5;
+    });
+    pdf.save('chat-session.pdf');
+};
+
+  const handleExportSession = (format: "pdf" | "md" | "txt") => {
+    if (format === "pdf") handleExportPDF();
+    // ignore other formats for now
   };
 
   return (
@@ -133,18 +155,16 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
 
       {messages.length > 0 && (
         <ChatActions
-          onGenerateCitations={generateCitations}
-          onExportSession={exportSession}
+          onGenerateCitations={() => generateCitations(messages)}
+          onExportSession={handleExportSession}
         />
       )}
 
-      <div className="flex-grow overflow-y-auto p-4">
+      {/* Container for export snapshot */}
+      <div id="chat-export-container" className="flex-grow overflow-y-auto p-4">
         {isPreloaded && <div></div>}
         {messages.length === 0 && !isPreloaded ? (
-          <EmptyState
-            greeting={greeting}
-            onStartResearch={startResearchTopic}
-          />
+          <EmptyState greeting={greeting} onStartResearch={startResearchTopic} />
         ) : (
           <>
             {messages.map((msg, idx) => (

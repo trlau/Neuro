@@ -101,7 +101,7 @@ export const handleErrorMessage = (messages: MessageType[], error: any): Message
 };
 
 // Generate citations (placeholder)
-export const generateCitations = () => {
+export const generateCitations = (messages: MessageType[]) => {
   alert("Citation generation feature is coming soon!");
 };
 
