@@ -8,6 +8,7 @@ import {
   collection,
   serverTimestamp,
   arrayUnion,
+  deleteDoc,
 } from "firebase/firestore";
 import { auth, db } from "../../../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -19,7 +20,7 @@ import { formatAiResponse, handleErrorMessage } from "../utils/chatUtils";
 export const useChat = (initialChatId: string | null) => {
   const [user, loadingAuth] = useAuthState(auth);
   const router = useRouter();
-  const { processResearchQuery } = useApi();
+  const { processResearchQuery } = useApi(initialChatId);
   let chatId = initialChatId;
 
   const [messages, setMessages] = useState<MessageType[]>([]);
@@ -90,6 +91,11 @@ export const useChat = (initialChatId: string | null) => {
     });
     router.push(`chat?id=${docRef.id}`);
     return docRef.id;
+  }
+
+  async function deleteChat(chatId : string) {
+    const current = user as User;
+    const docRef = await deleteDoc(doc(db, "chats", chatId))
   }
 
   // Quick-start topic setter
@@ -173,6 +179,7 @@ export const useChat = (initialChatId: string | null) => {
     setInput,
     isPreloaded,
     isLoading,
+    deleteChat,
     setIsLoading,
     greeting,
     setGreeting,

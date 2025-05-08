@@ -7,9 +7,10 @@ import {
   generateResponse,
   formatPaperData,
 } from "../utils/apiEndpoints";
+import { setChatTitle } from "../utils/firebaseUtils";
 import { formatAiResponse, handleErrorMessage } from "../utils/chatUtils";
 
-export const useApi = () => {
+export const useApi = (chatId : string | null) => {
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
   const [isApiOnline, setIsApiOnline] = useState(true);
   const [lastApiCheck, setLastApiCheck] = useState<Date | null>(null);
@@ -82,6 +83,16 @@ export const useApi = () => {
 
       // 1) Get keywords
       const keywords = await getSearchKeywords(model, userMessage);
+
+      if (chatId != null) {
+        const formattedString = keywords.replace('"', '').split('%20')
+        formattedString.forEach((word, index) => {
+          formattedString[index] = word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        const stringResult = formattedString.join(" ").replace('"', '');
+        
+        setChatTitle(chatId, stringResult);
+      }
 
       // 2) Search papers (graceful fallback)
       let papers: any[] = [];

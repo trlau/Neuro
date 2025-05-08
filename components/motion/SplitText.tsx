@@ -4,7 +4,7 @@ import { animate, stagger } from "motion"
 import { splitText } from "motion-plus"
 import { useEffect, useRef } from "react"
 
-export default function SplitText({text} : any) {
+export default function SplitText({children} : any) {
     const containerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -35,7 +35,7 @@ export default function SplitText({text} : any) {
     return (
         <div ref={containerRef}>
             <text className="h1">
-                {text}
+                {children}
             </text>
 
         </div>

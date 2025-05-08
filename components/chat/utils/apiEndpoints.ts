@@ -19,7 +19,6 @@ export const getSearchKeywords = async (model: string, content: string) => {
   if (!response.ok) {
     throw new Error(`Failed to get search keywords: ${response.status}`);
   }
-
   return response.text();
 };
 

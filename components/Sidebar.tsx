@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { db, auth, logout } from "../lib/firebase";
-import {motion} from "motion/react";
-import { LogOut, Settings, Search, Book, MessageSquarePlus, PanelLeftClose, FileText } from "lucide-react";
+import { AnimatePresence, motion, scale } from "motion/react";
+import { LogOut, Settings, Search, Book, MessageSquarePlus, PanelLeftClose, FileText, Cross } from "lucide-react";
 import {
   collection,
   query,
@@ -18,10 +18,49 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { SettingsDialog } from "../components/SettingsDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Button } from "./ui/button";
+import { X } from "lucide-react";
+import { useChat } from "./chat/hooks/useChat";
 
 interface SidebarProps {
   onSelectChat: (id: string) => void;
   selectedChatId?: string | null;
+}
+
+function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
+
+  const buttonXVariants = {
+    hovered: {size: 2},
+    not_hovered: {size: 1}
+  }
+
+  const MotionXIcon = motion(X);
+
+  const chatHook = useChat(chat.id);
+  function handleDelete(chatId: string) {
+    chatHook.deleteChat(chat.id);
+  }
+
+  const [isHovered, setIsHovered] = useState(false);
+  return (
+    <div className={`flex relative w-full box-border ${selectedChatId === chat.id && "rounded-md bg-blue-800/40 border-l-4 border-blue-500 font-semibold text-white"}`} onMouseEnter={() => { setIsHovered(true) }} onMouseLeave={() => setIsHovered(false)}>
+      <motion.button initial={{ opacity: 0, transform: "translateX(-20px)" }} exit={{ opacity: 0, transform: "translateX(-20px)" }} animate={{ opacity: 1, transform: "translateX(0px)" }}
+        key={chat.id}
+        onClick={() => onSelectChat(chat.id)}
+        className={`flex w-[80%] not-default items-center text-start rounded-md px-3 py-2 text-sm transition text-wrap break-all"
+          // : "hover:bg-gray-800 text-gray-300"
+          }`}
+      >
+        {chat.title}
+      </motion.button>
+
+      {(isHovered) && <div className="items-center flex">
+        <motion.button onClick={() => { handleDelete(chat.id) }}>
+          <MotionXIcon style={{scale: 1}} whileHover={{scale: 1.2}} transition={{duration: 0.5, type: "spring"}}/>
+        </motion.button>
+
+      </div>}
+    </div>
+  )
 }
 
 export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) {
@@ -31,6 +70,7 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+
 
   useEffect(() => {
     if (!user) return;
@@ -85,22 +125,21 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
     <>
       <TooltipProvider>
         <aside
-          className={`flex h-screen flex-col bg-gray-900 border-r border-gray-800 p-4 text-gray-200 shadow-inner transition-all duration-300 ${
-            collapsed ? "w-16" : "w-72"
-          }`}
+          className={`flex h-screen flex-col bg-gray-900 border-r border-gray-800 p-4 text-gray-200 shadow-inner transition-all duration-300 ${collapsed ? "w-16" : "w-72"
+            }`}
         >
-        {/* Top: "Neuro" Logo */}
-        <div className="flex items-center justify-center pb-6">
-          <button
-            onClick={() => router.push("/")}
-            className="text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition"
-          >
-            Neuro
-          </button>
-        </div>
+          {/* Top: "Neuro" Logo */}
+          <div className="flex items-center justify-center pb-6">
+            <button
+              onClick={() => router.push("/")}
+              className="text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition"
+            >
+              Neuro
+            </button>
+          </div>
 
-        {/* Top Icon Buttons */}
-        <div className="flex items-center justify-between pb-4">
+          {/* Top Icon Buttons */}
+          <div className="flex items-center justify-between pb-4">
 
             {/* Collapse Sidebar */}
             <Tooltip>
@@ -121,7 +160,7 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={() => console.log("Citation Generator clicked")}
+                  onClick={() => router.push("/citation-generator")}
                   className="rounded-md p-2 hover:bg-gray-800 transition"
                 >
                   <FileText size={20} />
@@ -166,26 +205,18 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
 
           {/* Chat List */}
           {!collapsed && (
-            <motion.nav transition={{staggerChildren: 0.07, delayChildren:0.2}}className="flex-1 overflow-y-auto overflow-x-hidden space-y-1">
-              {chats.length === 0 ? (
-                <div className="text-center text-sm text-gray-500 mt-10">
-                  No chats yet
-                </div>
-              ) : (
-                chats.map((chat) => (
-                  <motion.button   initial={{opacity: 0, transform: "translateX(-20px)"}} animate={{opacity:1, transform: "translateX(0px)"}}
-                    key={chat.id}
-                    onClick={() => onSelectChat(chat.id)}
-                    className={`flex w-full items-center text-start rounded-md px-3 py-2 text-sm transition ${
-                      selectedChatId === chat.id
-                        ? "bg-blue-800/40 border-l-4 border-blue-500 font-semibold text-white"
-                        : "hover:bg-gray-800 text-gray-300"
-                    }`}
-                  >
-                    {chat.title}
-                  </motion.button>
-                ))
-              )}
+            <motion.nav transition={{ staggerChildren: 0.07, delayChildren: 0.2 }} className="flex-1 overflow-y-auto overflow-x-hidden space-y-1">
+              <AnimatePresence>
+                {chats.length === 0 ? (
+                  <div className="text-center text-sm text-gray-500 mt-10">
+                    No chats yet
+                  </div>
+                ) : (
+                  chats.map((chat) => (
+                    <Button_ChatHistory key={chat.id} selectedChatId={selectedChatId} chat={chat} onSelectChat={onSelectChat}></Button_ChatHistory>
+                  ))
+                )}
+              </AnimatePresence>
             </motion.nav>
           )}
 
@@ -206,19 +237,19 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
                   onClick={() => setSettingsOpen(true)}
                   className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
                 >
-                <Settings size={18} /> Settings
-              </Button>
+                  <Settings size={18} /> Settings
+                </Button>
 
-              <Button
-                variant="ghost"
-                onClick={handleLogout}
-                className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
-              >
-                <LogOut size={18} /> Logout
-              </Button>
-            </>
-          )}
-        </div>
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                >
+                  <LogOut size={18} /> Logout
+                </Button>
+              </>
+            )}
+          </div>
         </aside>
       </TooltipProvider>
 

@@ -47,7 +47,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
     createNewChat,
   } = useChat(initialChatId);
 
-  const { apiStatus, processResearchQuery, handleOfflineMessage } = useApi();
+  const { apiStatus, processResearchQuery, handleOfflineMessage } = useApi(chatId);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [selectedModel, setSelectedModel] = useState<ModelType>(models[0]);
@@ -72,8 +72,6 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
     let currentChatId = chatId;
     if (!currentChatId) {
       currentChatId = await createNewChat(userMessage);
-    } else {
-      await setChatTitle(currentChatId, userMessage);
     }
 
     // Persist user message

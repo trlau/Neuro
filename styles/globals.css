@@ -31,6 +31,12 @@ button:hover {
   @apply shadow-lg scale-105;
 }
 
+button.not-default {
+  @apply transition-none
+}
+button.not-default:hover {
+  @apply scale-100
+}
 
 
 @layer base {

@@ -42,10 +42,10 @@ export const EmptyState = ({ greeting, onStartResearch }: EmptyStateProps) => {
           <BrainCircuit size={64} className="text-blue-500 mb-4 mx-auto" />
         </motion.span>
         
-        <h1 className="text-2xl font-bold text-white mb-2"><SplitText text="Hello, Researcher"></SplitText></h1>
-        <p className="text-gray-400 max-w-md mx-auto">
-          <SplitText text="Your AI research assistant is ready to help with academic queries, paper searches, and literature reviews."></SplitText>
-        </p>
+        <h1 className="text-2xl font-bold text-white mb-2"><SplitText>Hello, Researcher</SplitText></h1>
+        <h3 className="text-gray-400 max-w-md mx-auto">
+          <SplitText>Your AI research assistant is ready to help with academic queries, paper searches, and literature reviews.</SplitText>
+        </h3>
       </div>
 
       <motion.div variants={container} initial="hidden" animate="show"  className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">

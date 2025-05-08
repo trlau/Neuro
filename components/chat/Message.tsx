@@ -1,6 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import SplitText from "../motion/SplitText";
+import RadixAccordion from "../motion/Accordion";
 
 interface MessageProps {
   role: string;
@@ -76,7 +77,9 @@ const Message: React.FC<MessageProps> = ({ role, content }) => {
               }}
             >
               {content}
+              
             </ReactMarkdown>
+            <RadixAccordion></RadixAccordion>
           </div>
         </div>
       )}
