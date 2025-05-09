@@ -1,37 +1,54 @@
+import React from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "../../ui/dialog";
+import { FileText, X } from "lucide-react";
+import { Button } from "../../ui/button";
 
 interface PdfViewerProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  pdfUrl: string;
+  onClose: () => void;
+  pdfUrl: string | null;
 }
 
-export const PdfViewer = ({ isOpen, onOpenChange, pdfUrl }: PdfViewerProps) => {
+const PdfViewer: React.FC<PdfViewerProps> = ({ isOpen, onClose, pdfUrl }) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[80vh] p-0 bg-gray-900">
-        <DialogHeader className="p-4 border-b border-gray-700">
-          <DialogTitle>Paper Viewer</DialogTitle>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl h-[80vh] bg-zinc-900 border border-zinc-800">
+        <DialogHeader className="flex flex-row items-center justify-between pb-4 border-b border-zinc-800">
+          <DialogTitle className="flex items-center gap-2 text-white">
+            <FileText className="h-5 w-5 text-indigo-400" />
+            PDF Viewer
+          </DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-400 hover:text-white hover:bg-zinc-800/50"
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </DialogHeader>
-        <div className="h-full w-full overflow-hidden">
+        <div className="flex-1 overflow-hidden rounded-lg">
           {pdfUrl ? (
             <iframe
-              src={`${pdfUrl}#toolbar=0&navpanes=0`}
+              src={pdfUrl}
               className="w-full h-full border-0"
               title="PDF Viewer"
             />
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-400">No PDF available</p>
+            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+              <FileText className="h-12 w-12 mb-4 text-indigo-400/50" />
+              <p>No PDF document available</p>
             </div>
           )}
         </div>
       </DialogContent>
     </Dialog>
   );
-}; 
+};
+
+export default PdfViewer; 

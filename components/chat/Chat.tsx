@@ -1,35 +1,17 @@
-// File: components/chat/Chat.tsx
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
-import { ChatHeader } from "./components/ChatHeader";
-import { ChatActions } from "./components/ChatActions";
+import ChatHeader from "./components/ChatHeader";
+import ChatActions from "./components/ChatActions";
 import { EmptyState } from "./components/EmptyState";
-import { PdfViewer } from "./components/PdfViewer";
-import { ModelType } from "./types";
+import PdfViewer from "./components/PdfViewer";
 import { useChat } from "./hooks/useChat";
 import { useApi } from "./hooks/useApi";
 import { generateCitations, exportSession } from "./utils/chatUtils";
 import { BrainCircuit } from "lucide-react";
 
-const models: ModelType[] = [
-  {
-    name: "Deepseek v4",
-    description: "High performance open-source model with research specialization",
-    apiId: "deepseek/deepseek-chat:free",
-  },
-  {
-    name: "ChatGPT 4",
-    description: "OpenAI's advanced multimodal model",
-    apiId: "deepseek/deepseek-chat:free",
-  },
-  {
-    name: "Claude 3.7",
-    description: "Anthropic's cutting-edge assistant with research capabilities",
-    apiId: "deepseek/deepseek-chat:free",
-  },
-];
+const DEFAULT_MODEL = "deepseek-v4";
 
 export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
   const {
@@ -51,8 +33,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
   const { apiStatus, processResearchQuery, handleOfflineMessage } = useApi(chatId);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const [selectedModel, setSelectedModel] = useState<ModelType>(models[0]);
-  const [showModelInfo, setShowModelInfo] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
   const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
 
@@ -84,7 +65,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
     try {
       // Run the research pipeline
       const raw = await processResearchQuery(
-        selectedModel.apiId,
+        selectedModel,
         userMessage,
         setMessages,
         setInput,
@@ -114,6 +95,22 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
     }
   };
 
+  const handleExportSession = async (format: "pdf" | "md" | "txt") => {
+    try {
+      await exportSession(messages, format);
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
+  };
+
+  const handleGenerateCitations = async () => {
+    try {
+      await generateCitations(messages);
+    } catch (error) {
+      console.error("Citation generation failed:", error);
+    }
+  };
+
   const openPdfViewer = (url: string) => {
     setCurrentPdfUrl(url);
     setPdfViewerOpen(true);
@@ -128,18 +125,15 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
         <ChatHeader
-          models={models}
           selectedModel={selectedModel}
-          onModelSelect={setSelectedModel}
-          apiStatus={apiStatus}
-          showModelInfo={showModelInfo}
-          setShowModelInfo={setShowModelInfo}
+          onModelChange={setSelectedModel}
+          isConnected={apiStatus === "connected"}
         />
 
         {messages.length > 0 && (
           <ChatActions
-            onGenerateCitations={generateCitations}
-            onExportSession={exportSession}
+            onGenerateCitations={handleGenerateCitations}
+            onExportSession={handleExportSession}
           />
         )}
 
@@ -153,7 +147,12 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
           ) : (
             <>
               {messages.map((msg, idx) => (
-                <Message key={idx} role={msg.role} content={msg.content} />
+                <Message 
+                  key={idx} 
+                  role={msg.role} 
+                  content={msg.content}
+                  onPdfView={openPdfViewer}
+                />
               ))}
               <div ref={chatEndRef} />
             </>
@@ -173,7 +172,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
 
         <PdfViewer
           isOpen={pdfViewerOpen}
-          onOpenChange={setPdfViewerOpen}
+          onClose={() => setPdfViewerOpen(false)}
           pdfUrl={currentPdfUrl}
         />
       </div>

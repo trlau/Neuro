@@ -100,12 +100,69 @@ export const handleErrorMessage = (messages: MessageType[], error: any): Message
   return updated;
 };
 
-// Generate citations (placeholder)
-export const generateCitations = () => {
-  alert("Citation generation feature is coming soon!");
+// Generate citations from messages
+export const generateCitations = async (messages: MessageType[]) => {
+  try {
+    // Extract citations from messages
+    const citations = messages
+      .filter(msg => msg.role === "assistant")
+      .flatMap(msg => {
+        const citationMatches = msg.content.match(/\[(\d+)\]/g) || [];
+        return citationMatches.map(match => {
+          const number = match.replace(/[\[\]]/g, '');
+          return `Citation ${number}`;
+        });
+      });
+
+    if (citations.length === 0) {
+      alert("No citations found in the conversation.");
+      return;
+    }
+
+    // Format citations
+    const formattedCitations = citations.join('\n');
+    
+    // Create and download file
+    const blob = new Blob([formattedCitations], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'citations.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error generating citations:', error);
+    alert('Failed to generate citations. Please try again.');
+  }
 };
 
-// Export session (placeholder)
-export const exportSession = (format: "pdf" | "md" | "txt") => {
-  alert(`Export to ${format.toUpperCase()} coming soon!`);
+// Export session to different formats
+export const exportSession = async (messages: MessageType[], format: "pdf" | "md" | "txt") => {
+  try {
+    // Format messages based on type
+    const formattedMessages = messages.map(msg => {
+      const prefix = msg.role === 'user' ? 'User: ' : 'Assistant: ';
+      return `${prefix}${msg.content}`;
+    }).join('\n\n');
+
+    // Create and download file
+    const blob = new Blob([formattedMessages], { 
+      type: format === 'pdf' ? 'application/pdf' : 
+            format === 'md' ? 'text/markdown' : 
+            'text/plain' 
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat-export.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error exporting session:', error);
+    alert(`Failed to export session as ${format.toUpperCase()}. Please try again.`);
+  }
 }; 

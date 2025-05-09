@@ -10,109 +10,161 @@ import {
   ArrowDown,
 } from "lucide-react";
 import SplitText from "../../motion/SplitText";
-
-import {motion} from "motion/react"
+import { motion } from "motion/react";
+import { useEffect, useState, useRef } from "react";
 
 interface EmptyStateProps {
   greeting: string;
   onStartResearch: (topic: string) => void;
 }
-const container = {
+
+const researchOptions = [
+  {
+    icon: GraduationCap,
+    title: "Research Literature",
+    description: "Find recent papers on neuroplasticity",
+    query: "Find recent papers on neuroplasticity and memory formation"
+  },
+  {
+    icon: BookOpen,
+    title: "Topic Summary",
+    description: "Get an overview of long COVID neurological impacts",
+    query: "Summarize current understanding of long COVID neurological symptoms"
+  },
+  {
+    icon: Search,
+    title: "Method Comparison",
+    description: "Compare fMRI analysis methods for emotion studies",
+    query: "Compare methods for fMRI data analysis in emotion studies"
+  },
+  {
+    icon: FileText,
+    title: "Experiment Design",
+    description: "Get help designing an experiment on working memory",
+    query: "Help me design an experiment on working memory in children"
+  }
+];
+
+// Animation variants for parent and children
+const containerVariants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.25,
-      delayChildren: 0.5
-    }
-  }
-}
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+};
 
-const item = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1 }
-}
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 export const EmptyState = ({ greeting, onStartResearch }: EmptyStateProps) => {
+  const [gridCols, setGridCols] = useState(2);
+  const [maxRows, setMaxRows] = useState(2);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const animatedOnce = useRef(false);
+
+  useEffect(() => {
+    const updateGrid = () => {
+      const width = window.innerWidth;
+      const zoom = window.devicePixelRatio;
+      if (width < 640 || zoom > 1.5) {
+        setGridCols(1);
+        setMaxRows(2);
+      } else if (width < 1024 || zoom > 1.2) {
+        setGridCols(2);
+        setMaxRows(2);
+      } else {
+        setGridCols(2);
+        setMaxRows(2);
+      }
+    };
+    updateGrid();
+    window.addEventListener('resize', updateGrid);
+    return () => window.removeEventListener('resize', updateGrid);
+  }, []);
+
+  // Only show as many options as fit in the grid
+  const visibleOptions = researchOptions.slice(0, gridCols * maxRows);
+
+  // Only animate on first mount
+  useEffect(() => {
+    if (!animatedOnce.current) {
+      setTimeout(() => {
+        setHasAnimated(true);
+        animatedOnce.current = true;
+      }, 900); // slightly longer than the total animation duration
+    }
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 py-10">
       <div className="mb-8">
-        
-        <motion.span initial={{opacity:0, y: 30}} animate={{opacity:1, y: 0}} transition={{duration:2, ease: "easeOut"}}>
-          <BrainCircuit size={64} className="text-blue-500 mb-4 mx-auto" />
+        <motion.span 
+          initial={{opacity:0, y: 30}} 
+          animate={{opacity:1, y: 0}} 
+          transition={{duration:2, ease: "easeOut"}}
+        >
+          <BrainCircuit size={64} className="text-indigo-500 mb-4 mx-auto" />
         </motion.span>
-        
-        <h1 className="text-2xl font-bold text-white mb-2"><SplitText>Hello, Researcher</SplitText></h1>
+        <h1 className="text-2xl font-bold text-white mb-2">
+          <SplitText>Hello, Researcher</SplitText>
+        </h1>
         <h3 className="text-gray-400 max-w-md mx-auto">
           <SplitText>Your AI research assistant is ready to help with academic queries, paper searches, and literature reviews.</SplitText>
         </h3>
       </div>
-
-      <motion.div variants={container} initial="hidden" animate="show"  className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
-        <motion.div variants={item}
-          className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 transition-colors cursor-pointer group"
-          onClick={() => onStartResearch(
-            "Find recent papers on neuroplasticity and memory formation"
-          )}
+      {hasAnimated ? (
+        <div
+          className={`grid gap-6 w-full max-w-2xl`}
+          style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
         >
-          <GraduationCap className="text-blue-400 mb-3 group-hover:text-blue-300 transition-colors" />
-          <h3 className="font-semibold text-lg mb-1">Research Literature</h3>
-          <p className="text-gray-400 text-sm">Find recent papers on neuroplasticity</p>
-        </motion.div>
-        <motion.div variants={item}
-          className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 transition-colors cursor-pointer group"
-          onClick={() => onStartResearch(
-            "Summarize current understanding of long COVID neurological symptoms"
-          )}
-        >
-          <BookOpen className="text-blue-400 mb-3 group-hover:text-blue-300 transition-colors" />
-          <h3 className="font-semibold text-lg mb-1">Topic Summary</h3>
-          <p className="text-gray-400 text-sm">Get an overview of long COVID neurological impacts</p>
-        </motion.div>
-        <motion.div variants={item}
-          className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 transition-colors cursor-pointer group"
-          onClick={() => onStartResearch(
-            "Compare methods for fMRI data analysis in emotion studies"
-          )}
-        >
-          <Search className="text-blue-400 mb-3 group-hover:text-blue-300 transition-colors" />
-          <h3 className="font-semibold text-lg mb-1">Method Comparison</h3>
-          <p className="text-gray-400 text-sm">Compare fMRI analysis methods for emotion studies</p>
-        </motion.div>
-        <motion.div variants={item}
-          className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 transition-colors cursor-pointer group"
-          onClick={() => onStartResearch(
-            "Help me design an experiment on working memory in children"
-          )}
-        >
-          <FileText className="text-blue-400 mb-3 group-hover:text-blue-300 transition-colors" />
-          <h3 className="font-semibold text-lg mb-1">Experiment Design</h3>
-          <p className="text-gray-400 text-sm">Get help designing an experiment on working memory</p>
-        </motion.div>
-      </motion.div>
-        
-      
-      {/* <div className="mt-8 w-full max-w-2xl">
-        <div className="w-full bg-gray-800 p-4 rounded-lg border border-gray-700">
-          <h3 className="font-medium text-white mb-3 flex items-center">
-            <Clock size={16} className="mr-2" /> Recent Updates
-          </h3>
-          <ul className="text-sm text-gray-400">
-            <li className="mb-2 flex items-start">
-              <ArrowDown size={14} className="mr-2 mt-1 text-green-400" />
-              Added direct PDF viewing for open access papers
-            </li>
-            <li className="mb-2 flex items-start">
-              <ArrowDown size={14} className="mr-2 mt-1 text-green-400" />
-              New citation generator for APA, MLA, and Chicago styles
-            </li>
-            <li className="flex items-start">
-              <ArrowDown size={14} className="mr-2 mt-1 text-green-400" />
-              Export your research sessions as PDF or markdown
-            </li>
-          </ul>
+          {visibleOptions.map((option) => (
+            <div
+              key={option.title}
+              className="bg-zinc-900/60 p-8 rounded-2xl border border-zinc-800 hover:border-indigo-500/50 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:shadow-indigo-500/10 flex flex-col justify-center items-center h-full"
+              onClick={() => onStartResearch(option.query)}
+            >
+              <option.icon className="text-indigo-400 mb-4 group-hover:text-indigo-300 transition-colors" size={40} />
+              <h3 className="font-semibold text-xl mb-2 text-white group-hover:text-indigo-100 transition-colors">
+                {option.title}
+              </h3>
+              <p className="text-gray-400 text-base group-hover:text-gray-300 transition-colors">
+                {option.description}
+              </p>
+            </div>
+          ))}
         </div>
-      </div> */}
+      ) : (
+        <motion.div
+          className={`grid gap-6 w-full max-w-2xl`}
+          style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
+          {visibleOptions.map((option) => (
+            <motion.div
+              key={option.title}
+              variants={itemVariants}
+              className="bg-zinc-900/60 p-8 rounded-2xl border border-zinc-800 hover:border-indigo-500/50 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:shadow-indigo-500/10 flex flex-col justify-center items-center h-full"
+              onClick={() => onStartResearch(option.query)}
+            >
+              <option.icon className="text-indigo-400 mb-4 group-hover:text-indigo-300 transition-colors" size={40} />
+              <h3 className="font-semibold text-xl mb-2 text-white group-hover:text-indigo-100 transition-colors">
+                {option.title}
+              </h3>
+              <p className="text-gray-400 text-base group-hover:text-gray-300 transition-colors">
+                {option.description}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }; 
