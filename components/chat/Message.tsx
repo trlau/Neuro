@@ -44,7 +44,7 @@ const Message: React.FC<MessageProps> = ({ role, content }) => {
         // AI response container with improved styling
         <div className="w-full">
           <div className={`p-4 rounded-lg border-l-4 ${
-            isErrorMessage ? 'bg-red-900/20 border-red-500/50' : 'bg-gray-800/50 border-blue-500/50'
+            isErrorMessage ? 'bg-red-900/20 border-red-500/50' : 'bg-black/40 border-white/50 backdrop-blur-sm shadow-xl'
           }`}>
             <ReactMarkdown
               components={{

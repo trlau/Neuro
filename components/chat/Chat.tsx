@@ -119,7 +119,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white">
+    <div className="flex flex-col h-full w-full bg-black text-white font-space-grotesk relative backdrop-blur-sm">
       <ChatHeader
         models={models}
         selectedModel={selectedModel}

@@ -53,9 +53,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border-t border-gray-700 bg-gray-800">
+    <form onSubmit={handleSubmit} className="p-4 border-t border-white/10 bg-black/50 backdrop-blur-md">
       <div className="flex gap-2 items-end">
-        <div className="flex-1 bg-gray-700 rounded overflow-hidden flex items-end">
+        <div className="flex-1 bg-black/50 rounded-lg overflow-hidden flex items-end border border-white/10">
           <textarea
             ref={inputRef}
             value={input}

@@ -25,7 +25,7 @@ export const ChatHeader = ({
   setShowModelInfo
 }: ChatHeaderProps) => {
   return (
-    <div className="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+    <div className="p-4 bg-black/50 border-b border-white/10 flex justify-between items-center backdrop-blur-md">
       <div className="flex items-center relative">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-1.5 text-l font-semibold focus:outline-none">
