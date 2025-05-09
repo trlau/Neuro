@@ -11,7 +11,7 @@ import { useApi } from "./hooks/useApi";
 import { generateCitations, exportSession } from "./utils/chatUtils";
 import { BrainCircuit } from "lucide-react";
 
-const DEFAULT_MODEL = "deepseek-v4";
+const DEFAULT_MODEL = "deepseek/deepseek-chat:free";
 
 export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
   const {

@@ -2,7 +2,7 @@ import Sidebar from "./Sidebar";
 import { Chat } from "./../components/chat/Chat";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { ChatHeader } from "./chat/components/ChatHeader";
+// import { ChatHeader } from "./chat/components/ChatHeader";
 
 const Layout = ({children, setSelectedChatId, selectedChatId} : {children?: any, setSelectedChatId: (id: string) => void, selectedChatId: string | null}) => {
   const router = useRouter();
