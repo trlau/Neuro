@@ -127,11 +127,6 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
       
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
-        <div className="flex items-center justify-center py-4 border-b border-white/10">
-          <BrainCircuit size={32} className="text-white animate-pulse" />
-          <span className="ml-2 text-xl font-semibold">Neuro</span>
-        </div>
-
         <ChatHeader
           models={models}
           selectedModel={selectedModel}

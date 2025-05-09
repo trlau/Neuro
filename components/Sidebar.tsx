@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { db, auth, logout } from "../lib/firebase";
-import { AnimatePresence, motion, scale } from "motion/react";
-import { LogOut, Settings, Search, Book, MessageSquarePlus, PanelLeftClose, FileText, Cross } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { LogOut, Settings, Search, Book, MessageSquarePlus, PanelLeftClose, PanelLeftOpen, FileText, X, BrainCircuit, User } from "lucide-react";
 import {
   collection,
   query,
@@ -13,12 +13,13 @@ import {
   addDoc,
   serverTimestamp,
   where,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { SettingsDialog } from "../components/SettingsDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Button } from "./ui/button";
-import { X } from "lucide-react";
 import { useChat } from "./chat/hooks/useChat";
 
 interface SidebarProps {
@@ -27,40 +28,43 @@ interface SidebarProps {
 }
 
 function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
-
-  const buttonXVariants = {
-    hovered: {size: 2},
-    not_hovered: {size: 1}
-  }
-
-  const MotionXIcon = motion(X);
-
   const chatHook = useChat(chat.id);
+  const [isHovered, setIsHovered] = useState(false);
+
   function handleDelete(chatId: string) {
     chatHook.deleteChat(chat.id);
   }
 
-  const [isHovered, setIsHovered] = useState(false);
   return (
-    <div className={`flex relative w-full box-border ${selectedChatId === chat.id && "rounded-md bg-blue-800/40 border-l-4 border-blue-500 font-semibold text-white"}`} onMouseEnter={() => { setIsHovered(true) }} onMouseLeave={() => setIsHovered(false)}>
-      <motion.button initial={{ opacity: 0, transform: "translateX(-20px)" }} exit={{ opacity: 0, transform: "translateX(-20px)" }} animate={{ opacity: 1, transform: "translateX(0px)" }}
-        key={chat.id}
+    <div
+      className={`group w-full transition-all duration-200 ${
+        selectedChatId === chat.id
+          ? "bg-white/10 border-l-2 border-white/50"
+          : "hover:bg-white/5"
+      }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <button
         onClick={() => onSelectChat(chat.id)}
-        className={`flex w-[80%] not-default items-center text-start rounded-md px-3 py-2 text-sm transition text-wrap break-all"
-          // : "hover:bg-gray-800 text-gray-300"
-          }`}
+        className="flex w-full items-center justify-between px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors"
       >
-        {chat.title}
-      </motion.button>
-
-      {(isHovered) && <div className="items-center flex">
-        <motion.button onClick={() => { handleDelete(chat.id) }}>
-          <MotionXIcon style={{scale: 1}} whileHover={{scale: 1.2}} transition={{duration: 0.5, type: "spring"}}/>
-        </motion.button>
-
-      </div>}
+        <span className="truncate pl-2 text-left flex-1">{chat.title}</span>
+        <span
+          className={`ml-2 flex items-center transition-opacity duration-150 ${isHovered ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        >
+          <button
+            onClick={e => { e.stopPropagation(); handleDelete(chat.id); }}
+            className="p-1.5 rounded-md hover:bg-white/10 flex items-center justify-center"
+            tabIndex={-1}
+            aria-label="Delete chat"
+          >
+            <X size={14} className="text-gray-400 group-hover:text-white" />
+          </button>
+        </span>
+      </button>
     </div>
-  )
+  );
 }
 
 export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) {
@@ -70,7 +74,15 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [userName, setUserName] = useState<string>("");
 
+  useEffect(() => {
+    if (user?.email) {
+      const emailUsername = user.email.split('@')[0];
+      const formattedName = emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1);
+      setUserName(formattedName);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -125,135 +137,215 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
     <>
       <TooltipProvider>
         <aside
-          className={`flex h-screen flex-col bg-gray-900 border-r border-gray-800 p-4 text-gray-200 shadow-inner transition-all duration-300 ${collapsed ? "w-16" : "w-72"
-            }`}
+          className={`flex h-screen flex-col bg-black/50 backdrop-blur-md border-r border-white/10 transition-all duration-300 ${
+            collapsed ? "w-16" : "w-72"
+          }`}
         >
-          {/* Top: "Neuro" Logo */}
-          <div className="flex items-center justify-center pb-6">
-            <button
-              onClick={() => router.push("/")}
-              className="text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition"
-            >
-              Neuro
-            </button>
-          </div>
+          {/* Top: Logo and New Chat */}
+          <div className="flex flex-col gap-2 p-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => router.push("/")}
+                className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+              >
+                <BrainCircuit size={24} className="text-white" />
+                {!collapsed && <span className="text-lg font-semibold">Neuro</span>}
+              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setCollapsed(!collapsed)}
+                    className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
+                  >
+                    <motion.div
+                      animate={{ rotate: collapsed ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                    {collapsed ? (
+                      <PanelLeftOpen size={18} className="text-gray-400" />
+                    ) : (
+                      <PanelLeftClose size={18} className="text-gray-400" />
+                    )}
+                    </motion.div>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
+                  {collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                </TooltipContent>
+              </Tooltip>
+            </div>
 
-          {/* Top Icon Buttons */}
-          <div className="flex items-center justify-between pb-4">
-
-            {/* Collapse Sidebar */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setCollapsed(!collapsed)}
-                  className="rounded-md p-2 hover:bg-gray-800 transition"
-                >
-                  <PanelLeftClose size={20} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
-                <p>{collapsed ? "Expand Sidebar" : "Collapse Sidebar"}</p>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Citation Generator */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => router.push("/citation-generator")}
-                  className="rounded-md p-2 hover:bg-gray-800 transition"
-                >
-                  <FileText size={20} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
-                <p>Citation Generator</p>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Search */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => console.log("Search clicked")}
-                  className="rounded-md p-2 hover:bg-gray-800 transition"
-                >
-                  <Search size={20} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
-                <p>Search Chats</p>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* New Chat */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={createNewChat}
-                  disabled={isLoading}
-                  className="rounded-md p-2 hover:bg-gray-800 transition"
-                >
-                  <MessageSquarePlus size={20} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
-                <p>New Chat</p>
-              </TooltipContent>
-            </Tooltip>
+            {!collapsed ? (
+              <Button
+                onClick={createNewChat}
+                disabled={isLoading}
+                className="w-full justify-start gap-2 bg-white/10 hover:bg-white/20 text-white border-0"
+              >
+                <MessageSquarePlus size={18} />
+                New Chat
+              </Button>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={createNewChat}
+                    disabled={isLoading}
+                    className="w-full justify-center p-2 bg-white/10 hover:bg-white/20 text-white border-0"
+                  >
+                    <MessageSquarePlus size={18} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
+                  New Chat
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
 
           {/* Chat List */}
           {!collapsed && (
-            <motion.nav transition={{ staggerChildren: 0.07, delayChildren: 0.2 }} className="flex-1 overflow-y-auto overflow-x-hidden space-y-1">
-              <AnimatePresence>
-                {chats.length === 0 ? (
-                  <div className="text-center text-sm text-gray-500 mt-10">
-                    No chats yet
-                  </div>
-                ) : (
-                  chats.map((chat) => (
-                    <Button_ChatHistory key={chat.id} selectedChatId={selectedChatId} chat={chat} onSelectChat={onSelectChat}></Button_ChatHistory>
-                  ))
-                )}
-              </AnimatePresence>
-            </motion.nav>
+            <div className="flex-1 overflow-y-auto px-2">
+              <motion.nav 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-1"
+              >
+                <AnimatePresence>
+                  {chats.length === 0 ? (
+                    <div className="text-center text-sm text-gray-500 mt-10">
+                      No chats yet
+                    </div>
+                  ) : (
+                    chats.map((chat) => (
+                      <Button_ChatHistory 
+                        key={chat.id} 
+                        selectedChatId={selectedChatId} 
+                        chat={chat} 
+                        onSelectChat={onSelectChat}
+                      />
+                    ))
+                  )}
+                </AnimatePresence>
+              </motion.nav>
+            </div>
           )}
 
-          {/* Bottom Buttons */}
-          <div className="mt-6 border-t border-gray-800 pt-4 space-y-2">
-            {!collapsed && (
-              <>
+          {/* Bottom Actions */}
+          <div className="p-4 border-t border-white/10">
+            {!collapsed ? (
+              <div className="space-y-1">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/citation-generator")}
+                  className="w-full justify-start gap-2 text-gray-300 hover:text-white hover:bg-white/10"
+                >
+                  <FileText size={18} /> Citation Generator
+                </Button>
                 <Button
                   variant="ghost"
                   onClick={() => router.push("/docs")}
-                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                  className="w-full justify-start gap-2 text-gray-300 hover:text-white hover:bg-white/10"
                 >
                   <Book size={18} /> User Guide
                 </Button>
-
                 <Button
                   variant="ghost"
                   onClick={() => setSettingsOpen(true)}
-                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                  className="w-full justify-start gap-2 text-gray-300 hover:text-white hover:bg-white/10"
                 >
                   <Settings size={18} /> Settings
                 </Button>
-
                 <Button
                   variant="ghost"
                   onClick={handleLogout}
-                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                  className="w-full justify-start gap-2 text-gray-300 hover:text-white hover:bg-white/10"
                 >
                   <LogOut size={18} /> Logout
                 </Button>
-              </>
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <div className="flex items-center gap-2 px-2">
+                    <User size={16} className="text-gray-400" />
+                    <span className="text-sm text-gray-400 truncate">{userName}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() => router.push("/citation-generator")}
+                      className="p-2 hover:bg-white/10"
+                    >
+                      <FileText size={18} className="text-gray-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
+                    Citation Generator
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() => router.push("/docs")}
+                      className="p-2 hover:bg-white/10"
+                    >
+                      <Book size={18} className="text-gray-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
+                    User Guide
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setSettingsOpen(true)}
+                      className="p-2 hover:bg-white/10"
+                    >
+                      <Settings size={18} className="text-gray-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
+                    Settings
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={handleLogout}
+                      className="p-2 hover:bg-white/10"
+                    >
+                      <LogOut size={18} className="text-gray-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
+                    Logout
+                  </TooltipContent>
+                </Tooltip>
+                <div className="mt-4 pt-4 border-t border-white/10 w-full">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex justify-center">
+                        <User size={16} className="text-gray-400" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
+                      {userName}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
             )}
           </div>
         </aside>
       </TooltipProvider>
 
-      {/* Proper SettingsDialog */}
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );
