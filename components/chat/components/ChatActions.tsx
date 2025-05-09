@@ -24,9 +24,9 @@ const ChatActions: React.FC<ChatActionsProps> = ({
           variant="outline"
           size="sm"
           onClick={onGenerateCitations}
-          className="text-xs bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-indigo-300 hover:text-indigo-200"
+          className="px-5 py-2 rounded-full bg-white border-black text-black font-semibold shadow-sm hover:bg-black hover:text-white hover:border-white hover:shadow-lg focus:ring-2 focus:ring-black/40 transition-all"
         >
-          <FileBadge size={14} className="mr-1" /> Generate Citations
+          <FileBadge size={16} className="mr-2" /> Generate Citations
         </Button>
       </div>
       <div className="flex space-x-2">
@@ -35,34 +35,34 @@ const ChatActions: React.FC<ChatActionsProps> = ({
             <Button
               variant="outline"
               size="sm"
-              className="text-xs bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-indigo-300 hover:text-indigo-200"
+              className="px-5 py-2 rounded-full bg-white border-black text-black font-semibold shadow-sm hover:bg-black hover:text-white hover:border-white hover:shadow-lg focus:ring-2 focus:ring-black/40 transition-all"
             >
-              <Download size={14} className="mr-1" /> Export
+              <Download size={16} className="mr-2" /> Export
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-48 bg-zinc-900 border border-zinc-800"
+            className="w-52 bg-white border border-black rounded-xl shadow-lg mt-2"
           >
             <DropdownMenuItem
               onClick={() => onExportSession("pdf")}
-              className="flex items-center text-sm text-gray-200 hover:bg-zinc-800/50 cursor-pointer"
+              className="flex items-center text-sm text-black rounded-lg hover:bg-black hover:text-white hover:border-white cursor-pointer transition-all px-4 py-2"
             >
-              <FileText size={14} className="mr-2 text-indigo-400" />
+              <FileText size={16} className="mr-2" />
               Export as PDF
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onExportSession("md")}
-              className="flex items-center text-sm text-gray-200 hover:bg-zinc-800/50 cursor-pointer"
+              className="flex items-center text-sm text-black rounded-lg hover:bg-black hover:text-white hover:border-white cursor-pointer transition-all px-4 py-2"
             >
-              <FileDigit size={14} className="mr-2 text-indigo-400" />
+              <FileDigit size={16} className="mr-2" />
               Export as Markdown
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onExportSession("txt")}
-              className="flex items-center text-sm text-gray-200 hover:bg-zinc-800/50 cursor-pointer"
+              className="flex items-center text-sm text-black rounded-lg hover:bg-black hover:text-white hover:border-white cursor-pointer transition-all px-4 py-2"
             >
-              <FileText size={14} className="mr-2 text-indigo-400" />
+              <FileText size={16} className="mr-2" />
               Export as Text
             </DropdownMenuItem>
           </DropdownMenuContent>

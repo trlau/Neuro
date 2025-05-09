@@ -53,26 +53,31 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border-t border-white/10 bg-black/50 backdrop-blur-md">
+    <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-800 bg-black backdrop-blur-md">
       <div className="flex gap-2 items-end">
-        <div className="flex-1 bg-black/50 rounded-lg overflow-hidden flex items-end border border-white/10">
+        <div className={`flex-1 bg-zinc-800 rounded-lg overflow-hidden flex items-end border border-black shadow-sm transition-all focus-within:ring-2 focus-within:ring-white/40`}> 
           <textarea
             ref={inputRef}
             value={input}
             onChange={handleTextAreaChange}
             onKeyDown={handleKeyDown}
-            placeholder={isLoading ? "Processing..." : "Ask a research question..."}
+            placeholder={isLoading ? "Processing..." : (input ? "" : "Ask a research question...")}
             disabled={isLoading}
-            className="flex-1 p-3 bg-gray-700 text-white placeholder-gray-400 focus:outline-none resize-none min-h-[44px] max-h-[150px] w-full"
+            className={`flex-1 p-3 bg-zinc-800 text-white placeholder-gray-400 focus:outline-none resize-none min-h-[44px] max-h-[150px] w-full text-base transition-all ${input.split('\n').length > 1 ? 'overflow-y-auto' : 'overflow-y-hidden'}`}
             rows={1}
           />
         </div>
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className={`p-3 rounded-full ${
-            isLoading || !input.trim() ? 'bg-gray-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-          } text-white transition-colors flex items-center justify-center`}
+          className={`p-3 rounded-full border border-black shadow-sm flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/40
+            ${isLoading || !input.trim() 
+              ? 'bg-zinc-800 text-white opacity-50 cursor-not-allowed' 
+              : input.trim() 
+                ? 'bg-white text-black hover:bg-zinc-200 active:bg-zinc-300' 
+                : 'bg-black text-white hover:bg-zinc-900 active:bg-zinc-800'}
+          `}
+          aria-label="Send"
         >
           {isLoading ? (
             <div className="w-6 h-6 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
@@ -81,8 +86,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           )}
         </button>
       </div>
-      {/* Add a helpful message about API status if there are issues */}
-      <div className="mt-1 text-xs text-gray-500 text-right">
+      <div className="mt-2 text-xs text-gray-400 text-right min-h-[18px]">
         {isLoading && "Connecting to research database..."}
       </div>
     </form>

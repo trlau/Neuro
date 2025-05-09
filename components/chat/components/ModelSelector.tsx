@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, Info, Lock } from "lucide-react";
 import {
   DropdownMenu,
@@ -43,7 +43,15 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   onModelChange,
 }) => {
   const [showInfo, setShowInfo] = useState<string | null>(null);
-  const selectedModelInfo = models.find((model) => model.id === selectedModel);
+  const availableModel = models.find((model) => model.available) || models[0];
+  const selectedModelInfo = models.find((model) => model.id === selectedModel) || availableModel;
+
+  useEffect(() => {
+    if (!selectedModel || !selectedModelInfo.available) {
+      onModelChange(availableModel.id);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <div className="relative">

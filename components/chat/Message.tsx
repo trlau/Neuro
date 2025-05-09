@@ -1,7 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import SplitText from "../motion/SplitText";
-import RadixAccordion from "../motion/Accordion";
+import RadixAccordion, { PaperType } from "../motion/Accordion";
 import { MessageActions } from "./components/MessageActions";
 import { AlertCircle, FileText, ExternalLink } from "lucide-react";
 
@@ -9,19 +9,20 @@ interface MessageProps {
   role: string;
   content: string;
   onPdfView?: (url: string) => void;
+  papers?: PaperType[];
 }
 
-const Message: React.FC<MessageProps> = ({ role, content, onPdfView }) => {
+const Message: React.FC<MessageProps> = ({ role, content, onPdfView, papers }) => {
   // Handle loading state specially
   if (role === "assistant" && content === "...") {
     return (
       <div className="w-full flex justify-start mb-6">
         <div className="w-full">
-          <div className="bg-zinc-900/50 p-4 rounded-lg border-l-4 border-indigo-500/50">
+          <div className="bg-zinc-900/50 p-4 rounded-lg border-l-4 border-white/50">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse delay-100"></div>
-              <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse delay-200"></div>
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-100"></div>
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-200"></div>
               <span className="text-gray-400">Researching...</span>
             </div>
           </div>
@@ -43,30 +44,30 @@ const Message: React.FC<MessageProps> = ({ role, content, onPdfView }) => {
     <div className={`w-full flex ${role === "user" ? "justify-end mb-8" : "justify-center mb-8"}`}>
       {role === "user" ? (
         // User message bubble
-        <div className="max-w-[70%] bg-indigo-600 text-white p-3 rounded-lg shadow-md hover:shadow-lg hover:shadow-indigo-500/20 transition-all duration-300">
+        <div className="relative max-w-[70%] bg-zinc-800 text-white p-4 rounded-xl border border-black shadow-md hover:shadow-lg hover:shadow-black/20 transition-all duration-300">
+          <span className="absolute -top-3 right-4 bg-black text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm select-none">You</span>
           {content}
         </div>
       ) : (
         // AI response container with improved styling
-        <div className="w-8/12">
-          <div className={`p-4 rounded-lg border-l-4 ${
-            isErrorMessage 
-              ? 'bg-red-900/20 border-red-500/50' 
-              : 'bg-zinc-900/50 border-indigo-500/50 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300'
-          }`}>
+        <div className="w-full">
+          <div className={`relative p-6 rounded-2xl bg-zinc-800/80 shadow-xl mb-2 flex flex-col gap-2` +
+            (isErrorMessage ? ' border border-red-500/50' : ' border border-white/10')
+          }>
+            {/* AI chip */}
+            <span className="absolute -top-3 left-4 bg-white text-black text-xs font-bold px-2 py-0.5 rounded-full shadow-sm select-none">AI</span>
             {isErrorMessage && (
               <div className="flex items-center gap-2 mb-3 text-red-400">
                 <AlertCircle size={16} />
                 <span className="text-sm font-medium">Error</span>
               </div>
             )}
-            
             <ReactMarkdown
               components={{
-                p: ({ children }) => <p className="mb-3 text-gray-300 leading-relaxed">{children}</p>,
-                ul: ({ children }) => <ul className="list-disc ml-5 mb-4 space-y-2">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal ml-5 mb-4 space-y-2">{children}</ol>,
-                li: ({ children }) => <li className="text-gray-300">{children}</li>,
+                p: ({ children }) => <p className="mb-3 text-white leading-relaxed">{children}</p>,
+                ul: ({ children }) => <ul className="list-disc ml-5 mb-4 space-y-2 text-white">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal ml-5 mb-4 space-y-2 text-white">{children}</ol>,
+                li: ({ children }) => <li className="text-white">{children}</li>,
                 h1: ({ children }) => <h1 className="text-xl font-bold my-4 text-white">{children}</h1>,
                 h2: ({ children }) => <h2 className="text-lg font-bold my-3 text-white">{children}</h2>,
                 h3: ({ children }) => <h3 className="text-md font-semibold my-3 text-gray-200">{children}</h3>,
@@ -80,7 +81,7 @@ const Message: React.FC<MessageProps> = ({ role, content, onPdfView }) => {
                       href={href} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className="text-indigo-400 hover:text-indigo-300 hover:underline inline-flex items-center gap-1"
+                      className="text-white hover:text-gray-200 hover:underline inline-flex items-center gap-1"
                       onClick={(e) => {
                         if (isPdf && onPdfView && href) {
                           e.preventDefault();
@@ -94,12 +95,12 @@ const Message: React.FC<MessageProps> = ({ role, content, onPdfView }) => {
                   );
                 },
                 code: ({ children }) => (
-                  <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-sm font-mono text-indigo-200">
+                  <code className="bg-zinc-900 px-1.5 py-0.5 rounded text-sm font-mono text-white">
                     {children}
                   </code>
                 ),
                 blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-indigo-500/50 pl-4 italic text-gray-400 my-3 bg-zinc-900/30 py-2">
+                  <blockquote className="border-l-4 border-white/50 pl-4 italic text-gray-400 my-3 bg-zinc-900/30 py-2">
                     {children}
                   </blockquote>
                 ),
@@ -123,9 +124,8 @@ const Message: React.FC<MessageProps> = ({ role, content, onPdfView }) => {
                         <button
                           key={index}
                           onClick={() => onPdfView?.(url)}
-                          className="text-xs bg-zinc-800 hover:bg-zinc-700 text-indigo-300 px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                          className="px-5 py-2 rounded-full bg-black border border-white text-white font-semibold shadow-sm hover:bg-white hover:text-black hover:shadow-lg transition-all"
                         >
-                          <FileText size={12} />
                           {title}
                         </button>
                       );
@@ -136,7 +136,9 @@ const Message: React.FC<MessageProps> = ({ role, content, onPdfView }) => {
               </div>
             )}
 
-            <RadixAccordion />
+            {papers && papers.length > 0 && (
+              <RadixAccordion papers={papers} />
+            )}
           </div>
           <MessageActions content={content}></MessageActions>
         </div>

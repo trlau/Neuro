@@ -4,31 +4,22 @@ import * as Accordion from "@radix-ui/react-accordion"
 import { AnimatePresence, motion, MotionConfig } from "motion/react"
 import { useState } from "react"
 
-type paperSourceType = {
+export type PaperType = {
     id: string,
     title: string,
     year: number,
     abstract: string,
-    authors: {
-        name: string
-    }[]
-    url: string
+    authors: { name: string }[],
+    url: string,
+    publicationVenue?: { name: string, url?: string },
+    doi?: string
 }
 
-const accordionContent : paperSourceType[] = [
-    {
-        id: "what-is",
-        title: "Distribution of software engineering concepts beyond the software engineering course",
-        year: 2024,
-        abstract: "Yes",
-        authors: [
-            {name: "Khoo Ji Qiang"}
-        ],
-        url: "https://www.semanticscholar.org/paper/0e4b9c0a6ccc68d7a16d80b8239cff416da7b67b"
-    }
-]
+interface RadixAccordionProps {
+    papers: PaperType[]
+}
 
-function RadixAccordion() {
+function RadixAccordion({ papers }: RadixAccordionProps) {
     const [value, setValue] = useState<string>("")
 
     return (
@@ -41,106 +32,71 @@ function RadixAccordion() {
                 onValueChange={setValue}
                 className="accordion"
             >
-                {accordionContent.map((item) => (
-                    <AccordionItem
-                        key={item.id}
-                        item={item}
-                        isOpen={value === item.id}
-                        value={item.id}
-                        setValue={setValue}
-                    />
-                ))}
+                <Accordion.Item value="papers-table" className="section">
+                    <Accordion.Header>
+                        <Accordion.Trigger asChild>
+                            <motion.button
+                                className="trigger not-default"
+                                whileTap="pressed"
+                                onClick={() => setValue(value === "papers-table" ? "" : "papers-table")}
+                            >
+                                <span>Search Results</span>
+                                <ChevronDownIcon isOpen={value === "papers-table"} />
+                            </motion.button>
+                        </Accordion.Trigger>
+                    </Accordion.Header>
+                    <AnimatePresence initial={false}>
+                        {value === "papers-table" && (
+                            <Accordion.Content forceMount asChild>
+                                <motion.div
+                                    className="accordion-content"
+                                    initial="closed"
+                                    animate="open"
+                                    exit="closed"
+                                    variants={{
+                                        open: { height: "auto", opacity: 1 },
+                                        closed: { height: 0, opacity: 0 },
+                                    }}
+                                >
+                                    <div className="content-inner overflow-x-auto">
+                                        <table className="min-w-full text-left text-sm text-white border-separate border-spacing-y-2">
+                                            <thead>
+                                                <tr className="bg-zinc-800">
+                                                    <th className="px-4 py-2">Title</th>
+                                                    <th className="px-4 py-2">Authors</th>
+                                                    <th className="px-4 py-2">Year</th>
+                                                    <th className="px-4 py-2">Journal</th>
+                                                    <th className="px-4 py-2">DOI/URL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {papers.map((paper) => (
+                                                    <tr key={paper.id} className="bg-zinc-900 hover:bg-zinc-800 transition-colors">
+                                                        <td className="px-4 py-2 font-medium max-w-xs truncate" title={paper.title}>{paper.title}</td>
+                                                        <td className="px-4 py-2 max-w-xs truncate" title={paper.authors.map(a => a.name).join(", ")}>{paper.authors.map(a => a.name).join(", ")}</td>
+                                                        <td className="px-4 py-2">{paper.year}</td>
+                                                        <td className="px-4 py-2 max-w-xs truncate" title={paper.publicationVenue?.name}>{paper.publicationVenue?.name || "-"}</td>
+                                                        <td className="px-4 py-2">
+                                                            {paper.doi ? (
+                                                                <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">DOI</a>
+                                                            ) : paper.url ? (
+                                                                <a href={paper.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Link</a>
+                                                            ) : "-"}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </motion.div>
+                            </Accordion.Content>
+                        )}
+                    </AnimatePresence>
+                    <hr />
+                </Accordion.Item>
             </Accordion.Root>
             <StyleSheet />
         </MotionConfig>
-    )
-}
-
-type AccordionItemProps = {
-    item: paperSourceType
-    isOpen: boolean
-    value: string
-    setValue: (value: string) => void
-}
-
-function AccordionItem({ item, isOpen, setValue, value }: AccordionItemProps) {
-    const [hasFocus, setHasFocus] = useState(false)
-
-    return (
-        <Accordion.Item value={value} className="section">
-            <Accordion.Header>
-                <Accordion.Trigger asChild>
-                    <motion.button
-                        className="trigger not-default"
-                        onFocus={onlyKeyboardFocus(() => setHasFocus(true))}
-                        onBlur={() => setHasFocus(false)}
-                        whileTap="pressed"
-                        onClick={() => setValue(isOpen ? "" : value)}
-                    >
-                        <span>{item.title}</span>
-                        <ChevronDownIcon isOpen={isOpen} />
-                        {hasFocus && (
-                            <motion.div
-                                layoutId="focus-ring"
-                                className="focus-ring"
-                                variants={{
-                                    pressed: { scale: 0.9 },
-                                }}
-                                transition={{
-                                    type: "spring",
-                                    visualDuration: 0.2,
-                                    bounce: 0.2,
-                                }}
-                            />
-                        )}
-                    </motion.button>
-                </Accordion.Trigger>
-            </Accordion.Header>
-
-            <AnimatePresence initial={false}>
-                {isOpen && (
-                    <Accordion.Content forceMount asChild>
-                        <motion.div
-                            className="accordion-content"
-                            variants={{
-                                open: {
-                                    height: "auto",
-                                    maskImage:
-                                        "linear-gradient(to bottom, black 100%, transparent 100%)",
-                                },
-                                closed: {
-                                    height: 0,
-                                    maskImage:
-                                        "linear-gradient(to bottom, black 50%, transparent 100%)",
-                                },
-                            }}
-                            initial="closed"
-                            animate="open"
-                            exit="closed"
-                        >
-                            <motion.div
-                                variants={{
-                                    open: {
-                                        filter: "blur(0px)",
-                                        opacity: 1,
-                                    },
-                                    closed: {
-                                        filter: "blur(2px)",
-                                        opacity: 0,
-                                    },
-                                }}
-                            >
-                                <div className="content-inner">
-                                    <p><b>Url: </b><a href={item.url}>{item.url}</a></p>
-                                    <p><b>Bibliography: </b></p>
-                                </div>
-                            </motion.div>
-                        </motion.div>
-                    </Accordion.Content>
-                )}
-            </AnimatePresence>
-            <hr />
-        </Accordion.Item>
     )
 }
 
@@ -269,6 +225,9 @@ function StyleSheet() {
             .content-inner p + p {
                 margin-top: 1em;
             }
+
+            table { border-collapse: separate; border-spacing: 0 8px; }
+            th, td { white-space: nowrap; }
         `}</style>
     )
 }

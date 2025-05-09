@@ -1,4 +1,5 @@
 import { MessageType } from "../types";
+import { jsPDF } from "jspdf";
 
 // Format user message with proper styling
 export const formatUserMessage = (content: string): string => {
@@ -147,11 +148,22 @@ export const exportSession = async (messages: MessageType[], format: "pdf" | "md
       return `${prefix}${msg.content}`;
     }).join('\n\n');
 
-    // Create and download file
-    const blob = new Blob([formattedMessages], { 
-      type: format === 'pdf' ? 'application/pdf' : 
-            format === 'md' ? 'text/markdown' : 
-            'text/plain' 
+    if (format === 'pdf') {
+      // Use jsPDF to generate a real PDF
+      const doc = new jsPDF();
+      const lines = doc.splitTextToSize(formattedMessages, 180);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      doc.text(lines, 10, 20);
+      doc.save('chat-export.pdf');
+      return;
+    }
+
+    // Markdown or Text
+    const blob = new Blob([
+      format === 'md' ? formattedMessages.replace(/^(User|Assistant): /gm, '### $1\n') : formattedMessages
+    ], {
+      type: format === 'md' ? 'text/markdown' : 'text/plain'
     });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');

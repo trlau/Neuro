@@ -1,4 +1,3 @@
-
 import { Clipboard, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react"
 import { useFeedback } from "../hooks/useFeedback";
 import { useState } from "react";
@@ -6,16 +5,12 @@ import { AnimatePresence } from "motion/react";
 import { Dialog } from "../../motion/Modal";
 
 function handleActionReducer(action: string, payload: any) {
-
     const feedbacks = useFeedback();
     switch (action) {
         case "thumbs-up":
-
             feedbacks.createFeedback(payload.positivity, payload.content);
-
             break;
         case "thumbs-down":
-
             break;
         case "copy-message":
             navigator.clipboard.writeText(payload.content);
@@ -24,17 +19,18 @@ function handleActionReducer(action: string, payload: any) {
 }
 
 function ThumbsUpAction({ content }: any) {
-
+    const [isDialogOpened, setDialogOpen] = useState(false);
     function handleOnClick() {
         setDialogOpen(true);
     }
-
-    const [isDialogOpened, setDialogOpen] = useState(false);
-
     return (
         <>
-            <button onClick={() => { handleOnClick() }} className="w-8">
-                <ThumbsUpIcon size={20}></ThumbsUpIcon>
+            <button
+                onClick={handleOnClick}
+                className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 text-white hover:bg-white/10 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
+                aria-label="Like"
+            >
+                <ThumbsUpIcon size={20} />
             </button>
             <AnimatePresence>
                 {isDialogOpened && 
@@ -43,7 +39,6 @@ function ThumbsUpAction({ content }: any) {
                         <label>Comment</label>
                         <textarea className="text-clip bg-slate-900 rounded-xl border-spacing-1 border-slate-700 overflow-hidden"></textarea>
                     </fieldset>
-                    
                 </Dialog>}
             </AnimatePresence>
         </>
@@ -51,17 +46,18 @@ function ThumbsUpAction({ content }: any) {
 }
 
 function ThumbsDownAction({ content }: any) {
-    
+    const [isDialogOpened, setDialogOpen] = useState(false);
     function handleOnClick() {
         setDialogOpen(true);
     }
-
-    const [isDialogOpened, setDialogOpen] = useState(false);
-
     return (
         <>
-            <button onClick={() => { handleOnClick() }} className="w-8">
-                <ThumbsDownIcon size={20}></ThumbsDownIcon>
+            <button
+                onClick={handleOnClick}
+                className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 text-white hover:bg-white/10 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
+                aria-label="Dislike"
+            >
+                <ThumbsDownIcon size={20} />
             </button>
             <AnimatePresence>
                 {isDialogOpened && 
@@ -70,7 +66,6 @@ function ThumbsDownAction({ content }: any) {
                         <label>Comment</label>
                         <textarea className="text-clip bg-slate-900 rounded-xl border-spacing-1 border-slate-700 overflow-hidden"></textarea>
                     </fieldset>
-                    
                 </Dialog>}
             </AnimatePresence>
         </>
@@ -79,15 +74,19 @@ function ThumbsDownAction({ content }: any) {
 
 function CopyMessageAction({ content }: any) {
     return (
-        <button onClick={() => { handleActionReducer("copy-message", { content: content }) }} className="w-8">
-            <Clipboard size={20}></Clipboard>
+        <button
+            onClick={() => { handleActionReducer("copy-message", { content: content }) }}
+            className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 text-white hover:bg-white/10 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
+            aria-label="Copy message"
+        >
+            <Clipboard size={20} />
         </button>
     )
 }
 
 function MessageActions({ content }: any) {
     return (
-        <div className="flex mt-2">
+        <div className="flex mt-2 gap-2">
             <ThumbsUpAction content={content}></ThumbsUpAction>
             <ThumbsDownAction content={content}></ThumbsDownAction>
             <CopyMessageAction content={content}></CopyMessageAction>
