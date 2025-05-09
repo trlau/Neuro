@@ -136,7 +136,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
         />
       )}
 
-      <div className="flex-grow overflow-y-auto p-4">
+      <div className="flex-grow overflow-x-hidden overflow-y-auto p-4">
         {isPreloaded && <div></div>}
         {messages.length === 0 && !isPreloaded ? (
           <EmptyState

@@ -2,6 +2,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import SplitText from "../motion/SplitText";
 import RadixAccordion from "../motion/Accordion";
+import { MessageActions } from "./components/MessageActions";
 
 interface MessageProps {
   role: string;
@@ -12,8 +13,8 @@ const Message: React.FC<MessageProps> = ({ role, content }) => {
   // Handle loading state specially
   if (role === "assistant" && content === "...") {
     return (
-      <div className="w-full flex justify-start mb-6">
-        <div className="w-full">
+      <div className="w-full flex justify-center mb-6">
+        <div className="w-8/12">
           <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-blue-500/50">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
@@ -34,7 +35,7 @@ const Message: React.FC<MessageProps> = ({ role, content }) => {
      content.includes("Rate limit"));
 
   return (
-    <div className={`w-full flex ${role === "user" ? "justify-end mb-4" : "justify-start mb-6"}`}>
+    <div className={`w-full flex ${role === "user" ? "justify-end mb-8" : "justify-center mb-8"}`}>
       {role === "user" ? (
         // User message bubble
         <div className="max-w-[70%] bg-blue-500 text-white p-3 rounded-lg shadow-md">
@@ -42,7 +43,7 @@ const Message: React.FC<MessageProps> = ({ role, content }) => {
         </div>
       ) : (
         // AI response container with improved styling
-        <div className="w-full">
+        <div className="w-8/12">
           <div className={`p-4 rounded-lg border-l-4 ${
             isErrorMessage ? 'bg-red-900/20 border-red-500/50' : 'bg-gray-800/50 border-blue-500/50'
           }`}>
@@ -81,6 +82,7 @@ const Message: React.FC<MessageProps> = ({ role, content }) => {
             </ReactMarkdown>
             <RadixAccordion></RadixAccordion>
           </div>
+          <MessageActions content={content}></MessageActions>
         </div>
       )}
     </div>

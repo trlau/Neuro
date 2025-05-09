@@ -28,6 +28,8 @@ interface SidebarProps {
 
 function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
 
+  const router = useRouter();
+
   const buttonXVariants = {
     hovered: {size: 2},
     not_hovered: {size: 1}
@@ -38,11 +40,12 @@ function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
   const chatHook = useChat(chat.id);
   function handleDelete(chatId: string) {
     chatHook.deleteChat(chat.id);
+    router.push("/chat");
   }
 
   const [isHovered, setIsHovered] = useState(false);
   return (
-    <div className={`flex relative w-full box-border ${selectedChatId === chat.id && "rounded-md bg-blue-800/40 border-l-4 border-blue-500 font-semibold text-white"}`} onMouseEnter={() => { setIsHovered(true) }} onMouseLeave={() => setIsHovered(false)}>
+    <motion.div exit={{opacity: 0, transform: "translateX(-20px)"}} className={`flex relative w-full box-border ${selectedChatId === chat.id && "rounded-md bg-blue-800/40 border-l-4 border-blue-500 font-semibold text-white"}`} onMouseEnter={() => { setIsHovered(true) }} onMouseLeave={() => setIsHovered(false)}>
       <motion.button initial={{ opacity: 0, transform: "translateX(-20px)" }} exit={{ opacity: 0, transform: "translateX(-20px)" }} animate={{ opacity: 1, transform: "translateX(0px)" }}
         key={chat.id}
         onClick={() => onSelectChat(chat.id)}
@@ -59,7 +62,7 @@ function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
         </motion.button>
 
       </div>}
-    </div>
+    </motion.div>
   )
 }
 
