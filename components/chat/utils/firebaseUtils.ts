@@ -47,6 +47,19 @@ export const setChatMessage = async (chatId: string, role: string, message: stri
   );
 };
 
+export async function createUser() {
+  const current_user = auth.currentUser as User;
+  const docRef = await addDoc(collection(db, "users"), {
+    userId: current_user.uid,
+    role: "user",
+    timestamp: serverTimestamp()
+  });
+}
+
+export async function assignUser() {
+  
+}
+
 // Create new chat
 export const createNewChat = async (userMessage: string, router: any) => {
   const current_user = auth.currentUser as User;
