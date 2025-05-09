@@ -35,7 +35,10 @@ const Message: React.FC<MessageProps> = ({ role, content, onPdfView, papers }) =
   const isErrorMessage = role === "assistant" && 
     (content.includes("Connection error") || 
      content.includes("CORS error") || 
-     content.includes("Rate limit"));
+     content.includes("Rate limit") ||
+     content.includes("I'm sorry, I encountered an error") ||
+     content.includes("offline") ||
+     content.toLowerCase().includes("error"));
 
   // Check for PDF links in content
   const pdfLinks = content.match(/\[([^\]]+)\]\(([^)]+\.pdf)\)/g) || [];
@@ -51,63 +54,67 @@ const Message: React.FC<MessageProps> = ({ role, content, onPdfView, papers }) =
       ) : (
         // AI response container with improved styling
         <div className="w-full">
-          <div className={`relative p-6 rounded-2xl bg-zinc-800/80 shadow-xl mb-2 flex flex-col gap-2` +
-            (isErrorMessage ? ' border border-red-500/50' : ' border border-white/10')
-          }>
+          <div className={`relative p-6 rounded-2xl mb-2 flex flex-col gap-2 transition-all duration-300 " +
+            (isErrorMessage
+              ? 'bg-red-600 text-white shadow-lg'
+              : 'bg-zinc-800/80 shadow-xl border border-white/10')
+          }`}>
             {/* AI chip */}
-            <span className="absolute -top-3 left-4 bg-white text-black text-xs font-bold px-2 py-0.5 rounded-full shadow-sm select-none">AI</span>
+            <span className={`absolute -top-3 left-4 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm select-none ${isErrorMessage ? 'bg-white text-red-600 border border-red-600' : 'bg-white text-black'}`}>AI</span>
             {isErrorMessage && (
-              <div className="flex items-center gap-2 mb-3 text-red-400">
-                <AlertCircle size={16} />
-                <span className="text-sm font-medium">Error</span>
+              <div className="flex items-center gap-2 mb-3 text-white">
+                <AlertCircle size={18} className="text-white" />
+                <span className="text-base font-semibold">Error</span>
               </div>
             )}
-            <ReactMarkdown
-              components={{
-                p: ({ children }) => <p className="mb-3 text-white leading-relaxed">{children}</p>,
-                ul: ({ children }) => <ul className="list-disc ml-5 mb-4 space-y-2 text-white">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal ml-5 mb-4 space-y-2 text-white">{children}</ol>,
-                li: ({ children }) => <li className="text-white">{children}</li>,
-                h1: ({ children }) => <h1 className="text-xl font-bold my-4 text-white">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-lg font-bold my-3 text-white">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-md font-semibold my-3 text-gray-200">{children}</h3>,
-                h4: ({ children }) => <h4 className="font-semibold my-2 text-gray-200">{children}</h4>,
-                hr: () => <hr className="my-4 border-zinc-700" />,
-                strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
-                a: ({ href, children }) => {
-                  const isPdf = href?.toLowerCase().endsWith('.pdf');
-                  return (
-                    <a 
-                      href={href} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-white hover:text-gray-200 hover:underline inline-flex items-center gap-1"
-                      onClick={(e) => {
-                        if (isPdf && onPdfView && href) {
-                          e.preventDefault();
-                          onPdfView(href);
-                        }
-                      }}
-                    >
+            <div className={isErrorMessage ? 'text-white font-medium text-base' : ''}>
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <p className="mb-3 text-white leading-relaxed">{children}</p>,
+                  ul: ({ children }) => <ul className="list-disc ml-5 mb-4 space-y-2 text-white">{children}</ul>,
+                  ol: ({ children }) => <ol className="list-decimal ml-5 mb-4 space-y-2 text-white">{children}</ol>,
+                  li: ({ children }) => <li className="text-white">{children}</li>,
+                  h1: ({ children }) => <h1 className="text-xl font-bold my-4 text-white">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-lg font-bold my-3 text-white">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-md font-semibold my-3 text-gray-200">{children}</h3>,
+                  h4: ({ children }) => <h4 className="font-semibold my-2 text-gray-200">{children}</h4>,
+                  hr: () => <hr className="my-4 border-zinc-700" />,
+                  strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                  a: ({ href, children }) => {
+                    const isPdf = href?.toLowerCase().endsWith('.pdf');
+                    return (
+                      <a 
+                        href={href} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-white hover:text-gray-200 hover:underline inline-flex items-center gap-1"
+                        onClick={(e) => {
+                          if (isPdf && onPdfView && href) {
+                            e.preventDefault();
+                            onPdfView(href);
+                          }
+                        }}
+                      >
+                        {children}
+                        {isPdf ? <FileText size={14} /> : <ExternalLink size={14} />}
+                      </a>
+                    );
+                  },
+                  code: ({ children }) => (
+                    <code className="bg-zinc-900 px-1.5 py-0.5 rounded text-sm font-mono text-white">
                       {children}
-                      {isPdf ? <FileText size={14} /> : <ExternalLink size={14} />}
-                    </a>
-                  );
-                },
-                code: ({ children }) => (
-                  <code className="bg-zinc-900 px-1.5 py-0.5 rounded text-sm font-mono text-white">
-                    {children}
-                  </code>
-                ),
-                blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-white/50 pl-4 italic text-gray-400 my-3 bg-zinc-900/30 py-2">
-                    {children}
-                  </blockquote>
-                ),
-              }}
-            >
-              {content}
-            </ReactMarkdown>
+                    </code>
+                  ),
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-4 border-white/50 pl-4 italic text-gray-400 my-3 bg-zinc-900/30 py-2">
+                      {children}
+                    </blockquote>
+                  ),
+                }}
+              >
+                {content}
+              </ReactMarkdown>
+            </div>
 
             {pdfLinks.length > 0 && (
               <div className="mt-4 pt-4 border-t border-zinc-800">

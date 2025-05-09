@@ -117,13 +117,13 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-black text-white font-space-grotesk relative">
+    <div className="flex flex-col h-full w-full bg-black text-white font-space-grotesk relative">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/20 via-black to-black z-0" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent z-0" />
       
       {/* Content */}
-      <div className="relative z-10 flex flex-col h-full w-full max-w-none">
+      <div className="relative z-10 flex flex-col h-full">
         <ChatHeader
           selectedModel={selectedModel}
           onModelChange={setSelectedModel}
