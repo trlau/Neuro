@@ -1,5 +1,6 @@
 import { ModelType } from "../types";
 
+
 // Source API - Gets search keywords
 export const getSearchKeywords = async (model: string, content: string) => {
   const response = await fetch("http://localhost:5000/api/source", {

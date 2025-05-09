@@ -11,6 +11,15 @@ export const setChatTitle = async (chatId: string, newTitle: string) => {
   );
 };
 
+export async function addFeedback(positivity: string, content: string) {
+  await addDoc(collection(db, "feedbacks"), {
+    userId: auth.currentUser?.uid,
+    content: content,
+    positivity: positivity,
+    is_reviewed: false
+  })
+}
+
 // Load all messages for a chat
 export const loadAllMessages = async (chatId: string | null, setMessages: any) => {
   if (!chatId) return;

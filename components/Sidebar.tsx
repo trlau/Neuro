@@ -28,11 +28,22 @@ interface SidebarProps {
 }
 
 function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
+
+  const router = useRouter();
+
+  const buttonXVariants = {
+    hovered: {size: 2},
+    not_hovered: {size: 1}
+  }
+
+  const MotionXIcon = motion(X);
+
   const chatHook = useChat(chat.id);
   const [isHovered, setIsHovered] = useState(false);
 
   function handleDelete(chatId: string) {
     chatHook.deleteChat(chat.id);
+    router.push("/chat");
   }
 
   return (
