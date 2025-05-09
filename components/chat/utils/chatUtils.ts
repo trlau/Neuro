@@ -101,70 +101,124 @@ export const handleErrorMessage = (messages: MessageType[], error: any): Message
   return updated;
 };
 
-// Generate citations from messages
+// Helper to extract References section from a message
+const extractReferencesSection = (content: string): string | null => {
+  // Look for 'References' (case-insensitive) and grab all lines after it until next heading or end
+  const refMatch = content.match(/References[\s\n]*([\s\S]*)/i);
+  if (!refMatch) return null;
+  let refs = refMatch[1];
+  // Stop at next major heading (e.g., markdown heading, all-caps line, or line ending with colon)
+  const stopMatch = refs.match(/(^|\n)(#+\s|[A-Z][A-Z\s]+:|[A-Z][^\n]{0,40}:|^Appendix$|^Supplement$)/m);
+  if (stopMatch && stopMatch.index !== undefined) {
+    refs = refs.slice(0, stopMatch.index).trim();
+  }
+  return refs.trim() ? refs.trim() : null;
+};
+
 export const generateCitations = async (messages: MessageType[]) => {
   try {
-    // Extract citations from messages
-    const citations = messages
+    // Extract all references sections from assistant messages
+    const references: string[] = messages
       .filter(msg => msg.role === "assistant")
-      .flatMap(msg => {
-        const citationMatches = msg.content.match(/\[(\d+)\]/g) || [];
-        return citationMatches.map(match => {
-          const number = match.replace(/[\[\]]/g, '');
-          return `Citation ${number}`;
-        });
-      });
+      .map(msg => extractReferencesSection(msg.content))
+      .filter(Boolean) as string[];
 
-    if (citations.length === 0) {
-      alert("No citations found in the conversation.");
+    if (references.length === 0) {
+      alert("No references found in the conversation.");
       return;
     }
 
-    // Format citations
-    const formattedCitations = citations.join('\n');
-    
-    // Create and download file
-    const blob = new Blob([formattedCitations], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'citations.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    // Combine all references into one string
+    const combined = references.join("\n\n");
+
+    // Export as PDF (best format for citations)
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text("References", 10, 20);
+    const lines = doc.splitTextToSize(combined, 180);
+    doc.text(lines, 10, 30);
+    doc.save("citations.pdf");
   } catch (error) {
     console.error('Error generating citations:', error);
     alert('Failed to generate citations. Please try again.');
   }
 };
 
+// Add this helper function at the top
+const cleanContent = (content: string): string => {
+  return content
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/&lt;/g, '<')   // Replace HTML entities
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+    .trim();
+};
+
 // Export session to different formats
 export const exportSession = async (messages: MessageType[], format: "pdf" | "md" | "txt") => {
   try {
-    // Format messages based on type
+    // Format messages based on type, cleaning the content first
     const formattedMessages = messages.map(msg => {
       const prefix = msg.role === 'user' ? 'User: ' : 'Assistant: ';
-      return `${prefix}${msg.content}`;
+      const cleanedContent = cleanContent(msg.content);
+      return `${prefix}${cleanedContent}`;
     }).join('\n\n');
 
     if (format === 'pdf') {
-      // Use jsPDF to generate a real PDF
       const doc = new jsPDF();
-      const lines = doc.splitTextToSize(formattedMessages, 180);
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 20;
+      const lineHeight = 7;
+      let cursorY = margin;
+
+      // Set title
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("Chat Export", margin, cursorY);
+      cursorY += lineHeight * 2;
+
+      // Set content
+      doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(12);
-      doc.text(lines, 10, 20);
+      
+      const lines = doc.splitTextToSize(formattedMessages, pageWidth - (margin * 2));
+      
+      lines.forEach((line: string) => {
+        if (cursorY > doc.internal.pageSize.getHeight() - margin) {
+          doc.addPage();
+          cursorY = margin;
+        }
+        doc.text(line, margin, cursorY);
+        cursorY += lineHeight;
+      });
+
       doc.save('chat-export.pdf');
       return;
     }
 
     // Markdown or Text
-    const blob = new Blob([
-      format === 'md' ? formattedMessages.replace(/^(User|Assistant): /gm, '### $1\n') : formattedMessages
-    ], {
+    const content = format === 'md' 
+      ? formattedMessages
+          .split('\n\n')
+          .map(msg => {
+            if (msg.startsWith('User: ')) {
+              return msg.replace('User: ', '### User\n');
+            }
+            if (msg.startsWith('Assistant: ')) {
+              return msg.replace('Assistant: ', '### Assistant\n');
+            }
+            return msg;
+          })
+          .join('\n\n')
+      : formattedMessages;
+
+    const blob = new Blob([content], {
       type: format === 'md' ? 'text/markdown' : 'text/plain'
     });
+    
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

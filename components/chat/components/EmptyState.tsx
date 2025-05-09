@@ -128,7 +128,7 @@ export const EmptyState = ({ greeting, onStartResearch }: EmptyStateProps) => {
               key={option.title}
               className="bg-zinc-900/60 p-8 rounded-2xl border border-zinc-800 hover:border-indigo-500/50 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:shadow-indigo-500/10 flex flex-col justify-center items-center h-full"
               onClick={() => onStartResearch(option.query)}
-            >
+        >
               <option.icon className="text-indigo-400 mb-4 group-hover:text-indigo-300 transition-colors" size={40} />
               <h3 className="font-semibold text-xl mb-2 text-white group-hover:text-indigo-100 transition-colors">
                 {option.title}
@@ -153,7 +153,7 @@ export const EmptyState = ({ greeting, onStartResearch }: EmptyStateProps) => {
               variants={itemVariants}
               className="bg-zinc-900/60 p-8 rounded-2xl border border-zinc-800 hover:border-indigo-500/50 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:shadow-indigo-500/10 flex flex-col justify-center items-center h-full"
               onClick={() => onStartResearch(option.query)}
-            >
+        >
               <option.icon className="text-indigo-400 mb-4 group-hover:text-indigo-300 transition-colors" size={40} />
               <h3 className="font-semibold text-xl mb-2 text-white group-hover:text-indigo-100 transition-colors">
                 {option.title}
@@ -161,7 +161,7 @@ export const EmptyState = ({ greeting, onStartResearch }: EmptyStateProps) => {
               <p className="text-gray-400 text-base group-hover:text-gray-300 transition-colors">
                 {option.description}
               </p>
-            </motion.div>
+        </motion.div>
           ))}
         </motion.div>
       )}

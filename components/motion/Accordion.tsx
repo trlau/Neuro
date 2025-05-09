@@ -67,6 +67,7 @@ function RadixAccordion({ papers }: RadixAccordionProps) {
                                                     <th className="px-4 py-2">Year</th>
                                                     <th className="px-4 py-2">Journal</th>
                                                     <th className="px-4 py-2">DOI/URL</th>
+                                                    <th className="px-4 py-2">Abstract</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -83,6 +84,7 @@ function RadixAccordion({ papers }: RadixAccordionProps) {
                                                                 <a href={paper.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Link</a>
                                                             ) : "-"}
                                                         </td>
+                                                        <td className="px-4 py-2 max-w-xs truncate" title={paper.abstract}>{paper.abstract}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>

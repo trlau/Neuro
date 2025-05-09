@@ -10,6 +10,7 @@ import { useChat } from "./hooks/useChat";
 import { useApi } from "./hooks/useApi";
 import { generateCitations, exportSession } from "./utils/chatUtils";
 import { BrainCircuit } from "lucide-react";
+import ReferencesSection from "./components/ReferencesSection";
 
 const DEFAULT_MODEL = "deepseek/deepseek-chat:free";
 
@@ -147,12 +148,14 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
           ) : (
             <>
               {messages.map((msg, idx) => (
-                <Message 
-                  key={idx} 
-                  role={msg.role} 
-                  content={msg.content}
-                  onPdfView={openPdfViewer}
-                />
+                <React.Fragment key={idx}>
+                  <Message 
+                    role={msg.role} 
+                    content={msg.content}
+                    onPdfView={openPdfViewer}
+                  />
+                  {msg.role === "assistant" && <ReferencesSection aiResponse={msg.content} />}
+                </React.Fragment>
               ))}
               <div ref={chatEndRef} />
             </>

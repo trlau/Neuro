@@ -70,7 +70,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           className="w-72 bg-zinc-900 border border-zinc-800"
         >
           {models.map((model) => (
-            <DropdownMenuItem
+              <DropdownMenuItem
               key={model.id}
               className={cn(
                 "flex flex-col items-start p-3",
@@ -116,6 +116,6 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
       </DropdownMenu>
     </div>
   );
-};
+}; 
 
 export default ModelSelector; 

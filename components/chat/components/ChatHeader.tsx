@@ -38,11 +38,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
               <WifiOff className="h-4 w-4" />
               <span>Disconnected</span>
             </>
-          )}
+        )}
         </div>
       </div>
     </div>
   );
-};
+}; 
 
 export default ChatHeader; 
