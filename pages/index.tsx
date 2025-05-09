@@ -21,7 +21,10 @@ import {
   BrainCog,
   Library,
   Microscope,
-  GitBranch
+  GitBranch,
+  Github,
+  Twitter,
+  Linkedin
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 
@@ -34,9 +37,28 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
+  // Refs for sections
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const useCasesRef = useRef<HTMLDivElement>(null);
+  const workflowRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    if (ref.current) {
+      // Add offset for header height
+      const headerOffset = 80;
+      const elementPosition = ref.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const features = [
     { icon: Search, title: "Smart Search", description: "Find relevant academic papers with AI-powered semantic search" },
@@ -70,8 +92,44 @@ export default function Home() {
 
   return (
     <div ref={container} className="min-h-screen bg-black text-white font-space-grotesk">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <BrainCircuit size={32} className="text-white" />
+            <span className="text-xl font-semibold">Neuro</span>
+          </div>
+          <nav className="hidden md:flex items-center space-x-8">
+            <button onClick={() => scrollToSection(featuresRef)} className="text-gray-300 hover:text-white transition-colors">Features</button>
+            <button onClick={() => scrollToSection(useCasesRef)} className="text-gray-300 hover:text-white transition-colors">Use Cases</button>
+            <button onClick={() => scrollToSection(workflowRef)} className="text-gray-300 hover:text-white transition-colors">How It Works</button>
+          </nav>
+          <div className="flex items-center space-x-4">
+            <Button
+              onClick={() => router.push("/login")}
+              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full"
+            >
+              Sign In
+            </Button>
+            <Button
+              onClick={() => router.push("/login")}
+              className="bg-white text-black hover:bg-gray-100 px-4 py-2 rounded-full"
+            >
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Blob Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-blob" />
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full filter blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500/20 rounded-full filter blur-3xl animate-blob animation-delay-4000" />
+      </div>
+
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden px-4">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 pt-16">
         <div className="absolute inset-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/20 via-black to-black z-0" />
         <div className="max-w-6xl mx-auto text-center z-10">
           <motion.div
@@ -117,7 +175,7 @@ export default function Home() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 px-4 bg-black">
+      <section ref={featuresRef} className="py-20 px-4 bg-black">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -147,7 +205,7 @@ export default function Home() {
       </section>
 
       {/* Use Cases Section */}
-      <section className="py-20 px-4 bg-zinc-900/50">
+      <section ref={useCasesRef} className="py-20 px-4 bg-zinc-900/50">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -177,7 +235,7 @@ export default function Home() {
       </section>
 
       {/* Workflow Section */}
-      <section className="py-20 px-4 bg-black">
+      <section ref={workflowRef} className="py-20 px-4 bg-black">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
@@ -233,6 +291,53 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-black border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center space-x-2 mb-4">
+                <BrainCircuit size={32} className="text-white" />
+                <span className="text-xl font-semibold">Neuro</span>
+              </div>
+              <p className="text-gray-400 mb-4 max-w-md">
+                Empowering researchers with AI-powered tools to accelerate their work and make breakthrough discoveries.
+              </p>
+              <div className="flex space-x-4">
+                <a 
+                  href="https://github.com/trlau/Neuro#" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <Github size={24} />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <Twitter size={24} />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <Linkedin size={24} />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <BookOpen size={24} />
+                </a>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Product</h3>
+              <ul className="space-y-2">
+                <li><button onClick={() => scrollToSection(featuresRef)} className="text-gray-400 hover:text-white transition-colors">Features</button></li>
+                <li><button onClick={() => scrollToSection(useCasesRef)} className="text-gray-400 hover:text-white transition-colors">Use Cases</button></li>
+                <li><button onClick={() => scrollToSection(workflowRef)} className="text-gray-400 hover:text-white transition-colors">How It Works</button></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-400">
+            <p>&copy; {new Date().getFullYear()} Neuro. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

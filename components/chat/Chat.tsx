@@ -11,6 +11,7 @@ import { ModelType } from "./types";
 import { useChat } from "./hooks/useChat";
 import { useApi } from "./hooks/useApi";
 import { generateCitations, exportSession } from "./utils/chatUtils";
+import { BrainCircuit } from "lucide-react";
 
 const models: ModelType[] = [
   {
@@ -119,56 +120,68 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-black text-white font-space-grotesk relative backdrop-blur-sm">
-      <ChatHeader
-        models={models}
-        selectedModel={selectedModel}
-        onModelSelect={setSelectedModel}
-        apiStatus={apiStatus}
-        showModelInfo={showModelInfo}
-        setShowModelInfo={setShowModelInfo}
-      />
+    <div className="flex flex-col h-full w-full bg-black text-white font-space-grotesk relative">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/20 via-black to-black z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent z-0" />
+      
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex items-center justify-center py-4 border-b border-white/10">
+          <BrainCircuit size={32} className="text-white animate-pulse" />
+          <span className="ml-2 text-xl font-semibold">Neuro</span>
+        </div>
 
-      {messages.length > 0 && (
-        <ChatActions
-          onGenerateCitations={generateCitations}
-          onExportSession={exportSession}
+        <ChatHeader
+          models={models}
+          selectedModel={selectedModel}
+          onModelSelect={setSelectedModel}
+          apiStatus={apiStatus}
+          showModelInfo={showModelInfo}
+          setShowModelInfo={setShowModelInfo}
         />
-      )}
 
-      <div className="flex-grow overflow-y-auto p-4">
-        {isPreloaded && <div></div>}
-        {messages.length === 0 && !isPreloaded ? (
-          <EmptyState
-            greeting={greeting}
-            onStartResearch={startResearchTopic}
+        {messages.length > 0 && (
+          <ChatActions
+            onGenerateCitations={generateCitations}
+            onExportSession={exportSession}
           />
-        ) : (
-          <>
-            {messages.map((msg, idx) => (
-              <Message key={idx} role={msg.role} content={msg.content} />
-            ))}
-            <div ref={chatEndRef} />
-          </>
         )}
+
+        <div className="flex-grow overflow-y-auto p-4">
+          {isPreloaded && <div></div>}
+          {messages.length === 0 && !isPreloaded ? (
+            <EmptyState
+              greeting={greeting}
+              onStartResearch={startResearchTopic}
+            />
+          ) : (
+            <>
+              {messages.map((msg, idx) => (
+                <Message key={idx} role={msg.role} content={msg.content} />
+              ))}
+              <div ref={chatEndRef} />
+            </>
+          )}
+        </div>
+
+        <MessageInput
+          input={input}
+          setInput={setInput}
+          sendMessage={
+            apiStatus === "connected"
+              ? sendMessage
+              : () => handleOfflineMessage(input, setMessages, setInput, setIsLoading)
+          }
+          isLoading={isLoading}
+        />
+
+        <PdfViewer
+          isOpen={pdfViewerOpen}
+          onOpenChange={setPdfViewerOpen}
+          pdfUrl={currentPdfUrl}
+        />
       </div>
-
-      <MessageInput
-        input={input}
-        setInput={setInput}
-        sendMessage={
-          apiStatus === "connected"
-            ? sendMessage
-            : () => handleOfflineMessage(input, setMessages, setInput, setIsLoading)
-        }
-        isLoading={isLoading}
-      />
-
-      <PdfViewer
-        isOpen={pdfViewerOpen}
-        onOpenChange={setPdfViewerOpen}
-        pdfUrl={currentPdfUrl}
-      />
     </div>
   );
 };
