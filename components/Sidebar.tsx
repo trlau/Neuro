@@ -1,55 +1,260 @@
-import { useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Plus, LogOut, Settings } from "lucide-react";
+import { db, auth, logout } from "../lib/firebase";
+import { AnimatePresence, motion, scale } from "motion/react";
+import { LogOut, Settings, Search, Book, MessageSquarePlus, PanelLeftClose, FileText, Cross } from "lucide-react";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { SettingsDialog } from "../components/SettingsDialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Button } from "./ui/button";
+import { X } from "lucide-react";
+import { useChat } from "./chat/hooks/useChat";
 
-const Sidebar = ({ onSelectChat }: { onSelectChat: (id: string) => void }) => {
-  const router = useRouter();
-  const [chats, setChats] = useState([
-    { id: "1", title: "Chat with AI" },
-    { id: "2", title: "Research Notes" },
-  ]);
-
-  return (
-    <div className="w-72 h-screen bg-gray-900 text-gray-200 flex flex-col p-4 border-r border-gray-800">
-      {/* New Chat Button */}
-      <button
-        className="flex items-center gap-2 w-full px-4 py-3 text-left bg-gray-800 hover:bg-gray-700 rounded-lg transition"
-        onClick={() => console.log("New chat")}
-      >
-        <Plus size={18} /> New Chat
-      </button>
-
-      {/* Chat History */}
-      <div className="flex-grow mt-4 space-y-2 overflow-y-auto">
-        {chats.map((chat) => (
-          <button
-            key={chat.id}
-            onClick={() => onSelectChat(chat.id)}
-            className="w-full flex items-center px-4 py-3 text-left rounded-lg bg-gray-850 hover:bg-gray-700 transition"
-          >
-            {chat.title}
-          </button>
-        ))}
-      </div>
-
-      {/* Bottom Section */}
-      <div className="border-t border-gray-800 pt-4">
-        <button
-          className="flex items-center w-full px-4 py-3 gap-2 text-left rounded-lg hover:bg-gray-800 transition"
-          onClick={() => console.log("Open Settings")}
-        >
-          <Settings size={18} /> Settings
-        </button>
-
-        <button
-          className="flex items-center w-full px-4 py-3 gap-2 text-left rounded-lg hover:bg-gray-800 transition"
-          onClick={() => router.push("/login")}
-        >
-          <LogOut size={18} /> Logout
-        </button>
-      </div>
-    </div>
-  );
+interface SidebarProps {
+  onSelectChat: (id: string) => void;
+  selectedChatId?: string | null;
 }
 
-export default Sidebar;
+function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
+
+  const buttonXVariants = {
+    hovered: {size: 2},
+    not_hovered: {size: 1}
+  }
+
+  const MotionXIcon = motion(X);
+
+  const chatHook = useChat(chat.id);
+  function handleDelete(chatId: string) {
+    chatHook.deleteChat(chat.id);
+  }
+
+  const [isHovered, setIsHovered] = useState(false);
+  return (
+    <div className={`flex relative w-full box-border ${selectedChatId === chat.id && "rounded-md bg-blue-800/40 border-l-4 border-blue-500 font-semibold text-white"}`} onMouseEnter={() => { setIsHovered(true) }} onMouseLeave={() => setIsHovered(false)}>
+      <motion.button initial={{ opacity: 0, transform: "translateX(-20px)" }} exit={{ opacity: 0, transform: "translateX(-20px)" }} animate={{ opacity: 1, transform: "translateX(0px)" }}
+        key={chat.id}
+        onClick={() => onSelectChat(chat.id)}
+        className={`flex w-[80%] not-default items-center text-start rounded-md px-3 py-2 text-sm transition text-wrap break-all"
+          // : "hover:bg-gray-800 text-gray-300"
+          }`}
+      >
+        {chat.title}
+      </motion.button>
+
+      {(isHovered) && <div className="items-center flex">
+        <motion.button onClick={() => { handleDelete(chat.id) }}>
+          <MotionXIcon style={{scale: 1}} whileHover={{scale: 1.2}} transition={{duration: 0.5, type: "spring"}}/>
+        </motion.button>
+
+      </div>}
+    </div>
+  )
+}
+
+export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) {
+  const router = useRouter();
+  const [chats, setChats] = useState<{ id: string; title: string }[]>([]);
+  const [user] = useAuthState(auth);
+  const [isLoading, setIsLoading] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+
+  useEffect(() => {
+    if (!user) return;
+
+    const q = query(
+      collection(db, "chats"),
+      where("userId", "==", user.uid),
+      orderBy("timestamp", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setChats(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          title: doc.data().title || "New Chat",
+        }))
+      );
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const createNewChat = async () => {
+    if (!user || isLoading) return;
+    try {
+      setIsLoading(true);
+      const docRef = await addDoc(collection(db, "chats"), {
+        title: "New Chat",
+        userId: user.uid,
+        timestamp: serverTimestamp(),
+      });
+
+      onSelectChat(docRef.id);
+      await router.push(`/chat?id=${docRef.id}`, undefined, { shallow: false });
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  return (
+    <>
+      <TooltipProvider>
+        <aside
+          className={`flex h-screen flex-col bg-gray-900 border-r border-gray-800 p-4 text-gray-200 shadow-inner transition-all duration-300 ${collapsed ? "w-16" : "w-72"
+            }`}
+        >
+          {/* Top: "Neuro" Logo */}
+          <div className="flex items-center justify-center pb-6">
+            <button
+              onClick={() => router.push("/")}
+              className="text-2xl font-bold tracking-tight text-white hover:text-blue-400 transition"
+            >
+              Neuro
+            </button>
+          </div>
+
+          {/* Top Icon Buttons */}
+          <div className="flex items-center justify-between pb-4">
+
+            {/* Collapse Sidebar */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setCollapsed(!collapsed)}
+                  className="rounded-md p-2 hover:bg-gray-800 transition"
+                >
+                  <PanelLeftClose size={20} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
+                <p>{collapsed ? "Expand Sidebar" : "Collapse Sidebar"}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Citation Generator */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => router.push("/citation-generator")}
+                  className="rounded-md p-2 hover:bg-gray-800 transition"
+                >
+                  <FileText size={20} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
+                <p>Citation Generator</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Search */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => console.log("Search clicked")}
+                  className="rounded-md p-2 hover:bg-gray-800 transition"
+                >
+                  <Search size={20} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
+                <p>Search Chats</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* New Chat */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={createNewChat}
+                  disabled={isLoading}
+                  className="rounded-md p-2 hover:bg-gray-800 transition"
+                >
+                  <MessageSquarePlus size={20} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black text-white px-3 py-2 rounded-md text-sm">
+                <p>New Chat</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          {/* Chat List */}
+          {!collapsed && (
+            <motion.nav transition={{ staggerChildren: 0.07, delayChildren: 0.2 }} className="flex-1 overflow-y-auto overflow-x-hidden space-y-1">
+              <AnimatePresence>
+                {chats.length === 0 ? (
+                  <div className="text-center text-sm text-gray-500 mt-10">
+                    No chats yet
+                  </div>
+                ) : (
+                  chats.map((chat) => (
+                    <Button_ChatHistory key={chat.id} selectedChatId={selectedChatId} chat={chat} onSelectChat={onSelectChat}></Button_ChatHistory>
+                  ))
+                )}
+              </AnimatePresence>
+            </motion.nav>
+          )}
+
+          {/* Bottom Buttons */}
+          <div className="mt-6 border-t border-gray-800 pt-4 space-y-2">
+            {!collapsed && (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/docs")}
+                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                >
+                  <Book size={18} /> User Guide
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => setSettingsOpen(true)}
+                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                >
+                  <Settings size={18} /> Settings
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm text-left hover:bg-gray-800 transition"
+                >
+                  <LogOut size={18} /> Logout
+                </Button>
+              </>
+            )}
+          </div>
+        </aside>
+      </TooltipProvider>
+
+      {/* Proper SettingsDialog */}
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+    </>
+  );
+}
