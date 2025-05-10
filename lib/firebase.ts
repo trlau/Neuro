@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut, onAuthStateChanged, browserPopupRedirectResolver } from "firebase/auth";
 import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from "firebase/firestore";
 import { createUser } from "../components/chat/utils/firebaseUtils";
 
@@ -23,7 +23,7 @@ const githubProvider = new GithubAuthProvider();
 
 const loginWithGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
     if (result.user) {
       createUser();
     }
@@ -34,7 +34,7 @@ const loginWithGoogle = async () => {
 
 const loginWithGitHub = async () => {
   try {
-    await signInWithPopup(auth, githubProvider);
+    await signInWithPopup(auth, githubProvider, browserPopupRedirectResolver);
   } catch (error) {
     console.error("GitHub Login failed:", error);
   }
