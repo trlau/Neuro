@@ -14,7 +14,7 @@ export default function DocsContent() {
           <h2 className="text-2xl font-semibold">About Neuro</h2>
           <div className="space-y-4 text-gray-400 text-base">
             <p>
-              Founded in 2024, Neuro emerged from a vision to democratize academic research and make scholarly information more accessible. Our platform serves a diverse community of researchers, students, and professionals who value efficiency and accuracy in their research process.
+              Founded in 2025, Neuro emerged from a vision to democratize academic research and make scholarly information more accessible. Our platform serves a diverse community of researchers, students, and professionals who value efficiency and accuracy in their research process.
             </p>
             <p>
               What sets Neuro apart is our commitment to:
