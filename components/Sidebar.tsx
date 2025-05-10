@@ -28,16 +28,7 @@ interface SidebarProps {
 }
 
 function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
-
   const router = useRouter();
-
-  const buttonXVariants = {
-    hovered: {size: 2},
-    not_hovered: {size: 1}
-  }
-
-  const MotionXIcon = motion(X);
-
   const chatHook = useChat(chat.id);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -64,14 +55,21 @@ function Button_ChatHistory({ chat, onSelectChat, selectedChatId }: any) {
         <span
           className={`ml-2 flex items-center transition-opacity duration-150 ${isHovered ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         >
-          <button
+          <div
             onClick={e => { e.stopPropagation(); handleDelete(chat.id); }}
-            className="p-1.5 rounded-md hover:bg-white/10 flex items-center justify-center"
-            tabIndex={-1}
+            className="p-1.5 rounded-md hover:bg-white/10 flex items-center justify-center cursor-pointer"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleDelete(chat.id);
+              }
+            }}
             aria-label="Delete chat"
           >
             <X size={14} className="text-gray-400 group-hover:text-white" />
-          </button>
+          </div>
         </span>
       </button>
     </div>
