@@ -37,7 +37,7 @@ function ThumbsUpAction({ content }: any) {
                 <Dialog confirmCallback={() => {handleActionReducer("thumbs-up", { positivity: true, content: content })}} close={() => setDialogOpen(false)}>
                     <fieldset className="flex flex-col">
                         <label>Comment</label>
-                        <textarea className="text-clip bg-slate-900 rounded-xl border-spacing-1 border-slate-700 overflow-hidden"></textarea>
+                        <textarea className="text-clip bg-zinc-800 rounded-xl border-spacing-1 border-zinc-700 overflow-hidden"></textarea>
                     </fieldset>
                 </Dialog>}
             </AnimatePresence>
@@ -64,7 +64,7 @@ function ThumbsDownAction({ content }: any) {
                 <Dialog confirmCallback={() => {handleActionReducer("thumbs-down", { positivity: false, content: content })}} close={() => setDialogOpen(false)}>
                     <fieldset className="flex flex-col">
                         <label>Comment</label>
-                        <textarea className="text-clip bg-slate-900 rounded-xl border-spacing-1 border-slate-700 overflow-hidden"></textarea>
+                        <textarea className="text-clip bg-zinc-800 rounded-xl border-spacing-1 border-zinc-700 overflow-hidden"></textarea>
                     </fieldset>
                 </Dialog>}
             </AnimatePresence>

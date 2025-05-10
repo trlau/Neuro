@@ -82,7 +82,7 @@ export function Dialog({ children, close, confirmCallback, cancelCallback }: { c
                         if (confirmCallback) {
                             confirmCallback()
                         }
-                        }} className="save">
+                        }} id="save" className="save">
                         Continue
                     </button>
                 </div>
@@ -193,6 +193,10 @@ function StyleSheet() {
             border-radius: 10px;
         }
 
+        #save {
+            color: #000000
+        }
+
         .controls {
             border-top: 1px solid var(--divider);
             padding-top: 20px;
@@ -209,7 +213,7 @@ function StyleSheet() {
         .modal {
             border-radius: 10px;
             border: 1px solid #1d2628;
-            background-color: #0b1011;
+            background-color: #18181b;
             position: relative;
             z-index: 10000000;
             padding: 20px;

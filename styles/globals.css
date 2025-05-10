@@ -41,7 +41,7 @@ button.not-default:hover {
 
 @layer base {
   :root {
-    --primary-color: #3b82f6;
+    --primary-color: #ffffff;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
