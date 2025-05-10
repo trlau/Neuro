@@ -1,3 +1,5 @@
+"use client";
+
 import Sidebar from "./Sidebar";
 import { Chat } from "./../components/chat/Chat";
 import { useRouter } from "next/router";

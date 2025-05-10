@@ -1,5 +1,6 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/router";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
 import ChatHeader from "./components/ChatHeader";
@@ -9,7 +10,6 @@ import PdfViewer from "./components/PdfViewer";
 import { useChat } from "./hooks/useChat";
 import { useApi } from "./hooks/useApi";
 import { generateCitations, exportSession } from "./utils/chatUtils";
-import { BrainCircuit } from "lucide-react";
 import ReferencesSection from "./components/ReferencesSection";
 
 const DEFAULT_MODEL = "deepseek/deepseek-chat:free";

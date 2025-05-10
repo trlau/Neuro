@@ -1,18 +1,21 @@
+"use client";
+
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import SplitText from "../motion/SplitText";
 import RadixAccordion, { PaperType } from "../motion/Accordion";
 import { MessageActions } from "./components/MessageActions";
-import { AlertCircle, FileText, ExternalLink } from "lucide-react";
+import { AlertCircle, FileText, ExternalLink, User, Bot } from "lucide-react";
 
 interface MessageProps {
-  role: string;
+  role: "user" | "assistant";
   content: string;
   onPdfView?: (url: string) => void;
   papers?: PaperType[];
 }
 
-const Message: React.FC<MessageProps> = ({ role, content, onPdfView, papers }) => {
+const Message = ({ role, content, onPdfView, papers }: MessageProps) => {
+  const isUser = role === "user";
+
   // Handle loading state specially
   if (role === "assistant" && content === "...") {
     return (

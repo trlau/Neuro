@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useRef, useEffect } from "react";
 import { Send } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface MessageInputProps {
   input: string;
@@ -67,8 +70,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
             rows={1}
           />
         </div>
-        <button
-          type="submit"
+        <Button
+          onClick={sendMessage}
           disabled={isLoading || !input.trim()}
           className={`p-3 rounded-full border border-black shadow-sm flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/40
             ${isLoading || !input.trim() 
@@ -77,14 +80,13 @@ const MessageInput: React.FC<MessageInputProps> = ({
                 ? 'bg-white text-black hover:bg-zinc-200 active:bg-zinc-300' 
                 : 'bg-black text-white hover:bg-zinc-900 active:bg-zinc-800'}
           `}
-          aria-label="Send"
         >
           {isLoading ? (
             <div className="w-6 h-6 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
           ) : (
             <Send size={18} />
           )}
-        </button>
+        </Button>
       </div>
       <div className="mt-2 text-xs text-gray-400 text-right min-h-[18px]">
         {isLoading && "Connecting to research database..."}

@@ -1,3 +1,5 @@
+"use client";
+
 import { Clipboard, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react"
 import { useFeedback } from "../hooks/useFeedback";
 import { useState } from "react";
@@ -27,8 +29,9 @@ function ThumbsUpAction({ content }: any) {
         <>
             <button
                 onClick={handleOnClick}
-                className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 text-white hover:bg-white/10 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 border border-white/10 text-white font-semibold shadow-sm hover:bg-white hover:text-black hover:border-white hover:shadow-lg focus:ring-2 focus:ring-white/40 transition-all"
                 aria-label="Like"
+                title="Like this response and provide feedback"
             >
                 <ThumbsUpIcon size={20} />
             </button>
@@ -54,8 +57,9 @@ function ThumbsDownAction({ content }: any) {
         <>
             <button
                 onClick={handleOnClick}
-                className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 text-white hover:bg-white/10 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 border border-white/10 text-white font-semibold shadow-sm hover:bg-white hover:text-black hover:border-white hover:shadow-lg focus:ring-2 focus:ring-white/40 transition-all"
                 aria-label="Dislike"
+                title="Dislike this response and provide feedback"
             >
                 <ThumbsDownIcon size={20} />
             </button>
@@ -76,8 +80,9 @@ function CopyMessageAction({ content }: any) {
     return (
         <button
             onClick={() => { handleActionReducer("copy-message", { content: content }) }}
-            className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 text-white hover:bg-white/10 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 border border-white/10 text-white font-semibold shadow-sm hover:bg-white hover:text-black hover:border-white hover:shadow-lg focus:ring-2 focus:ring-white/40 transition-all"
             aria-label="Copy message"
+            title="Copy this message to clipboard"
         >
             <Clipboard size={20} />
         </button>

@@ -1,80 +1,97 @@
 # Neuro
 
-**Neuro** is an AI-driven research assistant designed to streamline the process of sourcing and summarizing academic literature. By integrating with Semantic Scholar, Neuro provides users with concise and relevant information based on their queries.
+**Neuro** is a free, open-source research assistant that makes academic literature accessible to everyone. No paywalls, no subscriptions - just straightforward access to research papers and AI-powered summaries.
 
-## Features
+## What You Can Do With Neuro
 
-- **User Queries**: Submit research questions or topics of interest.
-- **AI Summarization**: The AI engine condenses user prompts into brief summaries.
-- **Semantic Scholar Integration**: Fetches pertinent academic sources to inform responses.
-- **Source-Based Summaries**: Generates answers grounded in retrieved scholarly articles.
+- **Ask Research Questions**: Get AI-powered answers backed by academic papers
+- **Read Paper Summaries**: Understand complex research without reading 20+ pages
+- **Find Related Papers**: Discover connected research and build your knowledge base
+- **Generate Citations**: Get properly formatted citations in any style (APA, MLA, etc.)
+- **Export Your Research**: Save and organize your findings for later use
 
-## Getting Started
+## Current Status
+
+This repository contains the frontend interface for Neuro. The backend service is currently hosted separately. In the future, we'll provide a Docker setup that combines both frontend and backend for self-hosting.
+
+### Quick Start (Frontend Only)
+
+```bash
+# Clone and run the frontend
+git clone https://github.com/trlau/neuro.git
+cd neuro
+npm install
+npm run dev
+```
+
+> **Note**: You'll need to set up your own API keys for OpenAI and Semantic Scholar to use the full features.
+
+### Future Docker Setup
+
+We're working on a complete Docker setup that will include:
+- Frontend interface (this repo)
+- Backend server
+- Database
+- All necessary API integrations
+
+This will allow you to run the entire Neuro stack locally or on your own server.
+
+## Installation
 
 ### Prerequisites
+- Node.js 14+
+- npm 6+
+- OpenAI API key
+- Semantic Scholar API key
 
-- [Node.js](https://nodejs.org/) (version 14 or higher)
-- [npm](https://www.npmjs.com/) (version 6 or higher)
+### Manual Setup
 
-### Installation
+1. Clone and install:
+```bash
+git clone https://github.com/trlau/neuro.git
+cd neuro
+npm install
+```
 
-1. **Clone the Repository**:
+2. Set up environment variables:
+```env
+OPENAI_API_KEY=your_key
+SEMANTIC_SCHOLAR_API_KEY=your_key
+```
 
-   ```bash
-   git clone https://github.com/trlau/neuro.git
-   cd neuro
-   ```
-
-2. **Install Dependencies**:
-
-   ```bash
-   npm install
-   ```
-
-3. **Set Up Environment Variables**:
-
-   Create a `.env` file in the root directory and add your API keys:
-
-   ```env
-   OPENAI_API_KEY=your_openai_api_key
-   SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key
-   ```
-
-4. **Start the Application**:
-
-   ```bash
-   npm run dev
-   ```
-
-   Access the application at `http://localhost:3000`.
+3. Start the app:
+```bash
+npm run dev
+```
 
 ## Usage
 
-1. **Sign Up / Log In**: Create an account or log in to access the platform.
-2. **Enter a Query**: Input your research question or topic.
-3. **Select AI Engine**: Choose from available AI models for response generation.
-4. **Receive Summarized Response**: View concise answers with cited sources.
-5. **Access Full Articles**: Follow links to original research papers for in-depth reading.
+1. Type your research question
+2. Get AI-summarized answers with sources
+3. Click through to read full papers
+4. Export citations in your preferred format
+
+## Why We Built This
+
+Research shouldn't be locked behind paywalls. Whether you're a student, independent researcher, or just curious, Neuro gives you free access to academic papers and AI-powered summaries.
 
 ## Contributing
 
 We welcome contributions to enhance Neuro's capabilities:
 
 1. **Fork the Repository**: Click the 'Fork' button on GitHub.
-2. **Create a Feature Branch**: 
 
+2. **Create a Feature Branch**: 
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 3. **Commit Changes**: 
-
    ```bash
    git commit -m 'Add new feature'
    ```
 
 4. **Push to Branch**: 
-
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -83,4 +100,8 @@ We welcome contributions to enhance Neuro's capabilities:
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT License - feel free to use this for any purpose.
+
+## Support
+
+Found a bug? Have a feature request? Open an issue or email support@neuroapp.ai
