@@ -1,20 +1,24 @@
 import { GalleryVerticalEnd } from "lucide-react";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { cn } from "@/lib/utils";
 import {motion} from "motion/react";
 import { loginWithGoogle, loginWithGitHub } from "../lib/firebase";
-import MultiStateBadge from "./motion/MultiStateBadge";
+import { useRouter } from "next/router";
 
 export default function Auth({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
+
   return (
-    <div className={cn("flex h-screen w-screen items-center justify-center bg-gray-900", className)} {...props}>
-      <motion.div initial={{transform: "translateY(20px)", opacity:0}} animate={{transform: "translateY(0px)", opacity:1}} transition={{duration:0.6}}>
-        <form className="w-full max-w-md p-8 bg-gray-800 rounded-lg shadow-lg flex flex-col gap-6">
+    <div className={cn("flex h-screen w-screen items-center justify-center bg-black", className)} {...props}>
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/20 via-black to-black z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent z-0" />
+      
+      <motion.div initial={{transform: "translateY(20px)", opacity:0}} animate={{transform: "translateY(0px)", opacity:1}} transition={{duration:0.6}} className="relative z-10">
+        <form className="w-full max-w-md p-8 bg-zinc-900/50 backdrop-blur-sm rounded-lg shadow-lg flex flex-col gap-6 border border-zinc-800">
           {/* Branding */}
           <div className="flex flex-col items-center gap-2">
             <a href="#" className="flex flex-col items-center gap-2 font-medium">
@@ -27,30 +31,21 @@ export default function Auth({
             <p className="text-center text-gray-400 text-sm">AI-Powered Research Assistant</p>
           </div>
 
-          {/* Email Login */}
-          <div className="flex flex-col gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email" className="text-white">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                className="bg-gray-700 text-white border-gray-600 placeholder-gray-400"
-              />
-            </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white">
-              Login
-            </Button>
-            
-          </div>
+          {/* Return to Landing Button */}
+          <Button 
+            type="button" 
+            onClick={() => router.push('/')}
+            className="w-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
+          >
+            Return to Landing
+          </Button>
 
           {/* Divider */}
           <div className="relative text-center text-sm text-gray-400">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600" />
+              <div className="w-full border-t border-zinc-700" />
             </div>
-            <div className="relative px-4 bg-gray-800 text-gray-400">
+            <div className="relative px-4 bg-zinc-900/50 text-gray-400">
               Or
             </div>
           </div>
@@ -59,7 +54,7 @@ export default function Auth({
           <div className="flex flex-col gap-4 w-full">
             <Button
               variant="outline"
-              className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white border-none"
+              className="w-full flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
               onClick={loginWithGoogle}
             >
               {/* Google Icon */}
@@ -69,10 +64,9 @@ export default function Auth({
               Continue with Google
             </Button>
 
-
             <Button
               variant="outline"
-              className="w-full flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white border-none"
+              className="w-full flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
               onClick={loginWithGitHub}
             >
               {/* GitHub Icon */}
