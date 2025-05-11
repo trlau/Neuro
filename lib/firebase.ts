@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut, onAuthStateChanged, browserPopupRedirectResolver } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut, onAuthStateChanged, browserPopupRedirectResolver, getAdditionalUserInfo } from "firebase/auth";
 import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from "firebase/firestore";
-import { createUser } from "../components/chat/utils/firebaseUtils";
+import { is_userInDoc, createUser } from "../components/chat/utils/firebaseUtils";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDx2JFQAYFfzSpGDlL4KjLhL_Ru5zY8KuY",
@@ -24,8 +24,9 @@ const githubProvider = new GithubAuthProvider();
 const loginWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
-    if (result.user) {
-      createUser();
+    const userCreatedInDoc = await is_userInDoc()
+    if (result.user && !userCreatedInDoc) {
+      await createUser();
     }
   } catch (error) {
     console.error("Google Login failed:", error);

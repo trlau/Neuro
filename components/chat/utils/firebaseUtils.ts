@@ -47,10 +47,21 @@ export const setChatMessage = async (chatId: string, role: string, message: stri
   );
 };
 
+export async function is_userInDoc() {
+  const current_user = auth.currentUser as User;
+  const docUser = await getDoc(doc(db, "users", current_user.uid))
+  console.log(docUser.exists())
+
+  if (docUser.exists()) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 export async function createUser() {
   const current_user = auth.currentUser as User;
-  const docRef = await addDoc(collection(db, "users"), {
-    userId: current_user.uid,
+  const docRef = await setDoc(doc(db, "users", current_user.uid), {
     role: "user",
     timestamp: serverTimestamp()
   });

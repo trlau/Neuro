@@ -11,9 +11,10 @@ import { LoadingPage } from "../components/Loading";
 export default function MyApp({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);
   const router = useRouter();
+  
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && (router.pathname == "/login")) {
       router.push("/login");
     }
   }, [user, loading, router]);
