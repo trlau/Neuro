@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut, onAuthStateChanged, browserPopupRedirectResolver, getAdditionalUserInfo } from "firebase/auth";
 import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from "firebase/firestore";
-import { is_userInDoc, createUser } from "../components/chat/utils/firebaseUtils";
+import { is_userInDoc, createUser, getUserRole } from "../components/chat/utils/firebaseUtils";
+import { useAuth } from "../route/AuthContext";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDx2JFQAYFfzSpGDlL4KjLhL_Ru5zY8KuY",

@@ -59,6 +59,20 @@ export async function is_userInDoc() {
   }
 }
 
+export async function getUserRole() {
+  const current_user = auth.currentUser as User;
+  const docUser = await getDoc(doc(db, "users", current_user.uid))
+  let role = "";
+  if (docUser.exists()) {
+    role = docUser.get("role");
+  }
+  else {
+    throw new Error("User document doesn't exist in database");
+  }
+  return role;
+}
+
+
 export async function createUser() {
   const current_user = auth.currentUser as User;
   const docRef = await setDoc(doc(db, "users", current_user.uid), {
