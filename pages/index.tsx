@@ -93,7 +93,7 @@ export default function Home() {
   return (
     <div ref={container} className="min-h-screen bg-black text-white font-space-grotesk">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-white/10">
+      <header className="w-screen fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <BrainCircuit size={32} className="text-white" />
@@ -129,7 +129,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 pt-16">
+      <section className="w-screen relative min-h-screen flex items-center justify-center overflow-hidden px-4 pt-16">
         <div className="absolute inset-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/20 via-black to-black z-0" />
         <div className="max-w-6xl mx-auto text-center z-10">
           <motion.div
@@ -157,7 +157,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-zinc-900/50 backdrop-blur-sm">
+      <section className="py-20 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 px-4">
           {stats.map((stat, index) => (
             <motion.div
