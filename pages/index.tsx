@@ -87,7 +87,6 @@ export default function Home() {
     { icon: Search, title: "Discover", description: "Find relevant papers with semantic search" },
     { icon: FileText, title: "Analyze", description: "Get AI-powered summaries and insights" },
     { icon: BarChart, title: "Organize", description: "Manage citations and build your library" },
-    { icon: Share2, title: "Collaborate", description: "Share findings with your research team" }
   ];
 
   return (
@@ -246,7 +245,7 @@ export default function Home() {
             <h2 className="text-5xl font-bold mb-4">How It Works</h2>
             <p className="text-xl text-gray-400">Simple steps to transform your research process</p>
           </motion.div>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {workflow.map((step, index) => (
               <motion.div
                 key={index}
