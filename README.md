@@ -47,22 +47,22 @@ This will allow you to run the entire Neuro stack locally or on your own server.
 ### Manual Setup
 
 1. Clone and install:
-```bash
-git clone https://github.com/trlau/neuro.git
-cd neuro
-npm install
-```
+   ```bash
+   git clone https://github.com/trlau/neuro.git
+   cd neuro
+   npm install
+   ```
 
 2. Set up environment variables:
-```env
+   ```env
 OPENAI_API_KEY=your_key
 SEMANTIC_SCHOLAR_API_KEY=your_key
-```
+   ```
 
 3. Start the app:
-```bash
-npm run dev
-```
+   ```bash
+   npm run dev
+   ```
 
 ## Usage
 

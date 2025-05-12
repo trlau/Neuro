@@ -244,6 +244,8 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
           <div className="p-4 border-t border-white/10">
             {!collapsed ? (
               <div className="space-y-1">
+                {/* Remove Citation Generator button */}
+                {/*
                 <Button
                   variant="ghost"
                   onClick={() => router.push("/citation-generator")}
@@ -251,6 +253,7 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
                 >
                   <FileText size={18} /> Citation Generator
                 </Button>
+                */}
                 <Button
                   variant="ghost"
                   onClick={() => router.push("/docs")}
@@ -288,6 +291,8 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
+                {/* Remove Citation Generator button (collapsed) */}
+                {/*
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -302,6 +307,7 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
                     Citation Generator
                   </TooltipContent>
                 </Tooltip>
+                */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
