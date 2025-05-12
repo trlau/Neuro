@@ -2,17 +2,20 @@
 
 import { Clipboard, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react"
 import { useFeedback } from "../hooks/useFeedback";
-import { useState } from "react";
+import { useState, useRef, RefObject } from "react";
 import { AnimatePresence } from "motion/react";
 import { Dialog } from "../../motion/Modal";
 
 function handleActionReducer(action: string, payload: any) {
     const feedbacks = useFeedback();
+
+    
     switch (action) {
         case "thumbs-up":
             feedbacks.createFeedback(payload.positivity, payload.content);
             break;
         case "thumbs-down":
+            feedbacks.createFeedback(payload.positivity, payload.content);
             break;
         case "copy-message":
             navigator.clipboard.writeText(payload.content);
@@ -22,6 +25,7 @@ function handleActionReducer(action: string, payload: any) {
 
 function ThumbsUpAction({ content }: any) {
     const [isDialogOpened, setDialogOpen] = useState(false);
+    const [feedbackContent, setFeedbackContent] = useState("");
     function handleOnClick() {
         setDialogOpen(true);
     }
@@ -37,10 +41,10 @@ function ThumbsUpAction({ content }: any) {
             </button>
             <AnimatePresence>
                 {isDialogOpened && 
-                <Dialog confirmCallback={() => {handleActionReducer("thumbs-up", { positivity: true, content: content })}} close={() => setDialogOpen(false)}>
+                <Dialog confirmCallback={() => {handleActionReducer("thumbs-up", { positivity: true, content: feedbackContent })}} close={() => setDialogOpen(false)}>
                     <fieldset className="flex flex-col">
                         <label>Comment</label>
-                        <textarea className="text-clip bg-zinc-800 rounded-xl border-spacing-1 border-zinc-700 overflow-hidden"></textarea>
+                        <textarea onChange={(e) => {setFeedbackContent(e.target.value)}} className="text-clip bg-zinc-800 rounded-xl border-spacing-1 border-zinc-700 overflow-hidden"></textarea>
                     </fieldset>
                 </Dialog>}
             </AnimatePresence>
@@ -50,6 +54,7 @@ function ThumbsUpAction({ content }: any) {
 
 function ThumbsDownAction({ content }: any) {
     const [isDialogOpened, setDialogOpen] = useState(false);
+    const [feedbackContent, setFeedbackContent] = useState("");
     function handleOnClick() {
         setDialogOpen(true);
     }
@@ -65,10 +70,10 @@ function ThumbsDownAction({ content }: any) {
             </button>
             <AnimatePresence>
                 {isDialogOpened && 
-                <Dialog confirmCallback={() => {handleActionReducer("thumbs-down", { positivity: false, content: content })}} close={() => setDialogOpen(false)}>
+                <Dialog confirmCallback={() => {handleActionReducer("thumbs-down", { positivity: false, content: feedbackContent })}} close={() => setDialogOpen(false)}>
                     <fieldset className="flex flex-col">
                         <label>Comment</label>
-                        <textarea className="text-clip bg-zinc-800 rounded-xl border-spacing-1 border-zinc-700 overflow-hidden"></textarea>
+                        <textarea onChange={(e) => {setFeedbackContent(e.target.value)}} className="text-clip bg-zinc-800 rounded-xl border-spacing-1 border-zinc-700 overflow-hidden"></textarea>
                     </fieldset>
                 </Dialog>}
             </AnimatePresence>
