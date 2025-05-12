@@ -12,6 +12,7 @@ import { useApi } from "./hooks/useApi";
 import { generateCitations, exportSession } from "./utils/chatUtils";
 import ReferencesSection from "./components/ReferencesSection";
 import { getSearchKeywords, searchPapers } from "./utils/apiEndpoints";
+import { parseReferences } from "./utils/parseReferences";
 
 const DEFAULT_MODEL = "deepseek/deepseek-chat:free";
 
@@ -93,7 +94,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
       await setChatMessage(currentChatId, "assistant", raw, papers);
       setMessages((prev) => {
         const copy = [...prev];
-        copy[copy.length - 1] = { role: "assistant", content: raw };
+        copy[copy.length - 1] = { role: "assistant", content: raw, references: papers };
         return copy;
       });
     } catch {
@@ -122,9 +123,35 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
 
   const handleGenerateCitations = async () => {
     try {
-      await generateCitations(messages);
+      // Find the latest assistant message with references
+      const lastAssistantMsg = [...messages].reverse().find(
+        msg => msg.role === "assistant" && msg.references && msg.references.length > 0
+      );
+      if (!lastAssistantMsg) {
+        alert("No references found in the conversation.");
+        return;
+      }
+      // Extract the Search Results section (table content)
+      const searchResultsMatch = lastAssistantMsg.content.match(/Search Results[\s\S]*?\n([\s\S]*?)(?:\n\s*\n|$)/i);
+      const searchResultsText = searchResultsMatch ? searchResultsMatch[1].trim() : "";
+      const papers = lastAssistantMsg.references || [];
+      if (!papers || papers.length === 0) {
+        alert("No references found in the conversation.");
+        return;
+      }
+      // Dynamically import jsPDF to avoid SSR issues
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF();
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      doc.text("References", 10, 20);
+      const lines = papers.map((paper, idx) => `${idx + 1}. ${paper.title}`);
+      const splitLines = doc.splitTextToSize(lines.join("\n"), 180);
+      doc.text(splitLines, 10, 30);
+      doc.save("citations.pdf");
     } catch (error) {
       console.error("Citation generation failed:", error);
+      alert("Failed to generate citations. Please try again.");
     }
   };
 
