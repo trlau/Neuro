@@ -9,6 +9,8 @@ import {
 } from "../utils/apiEndpoints";
 import { setChatTitle } from "../utils/firebaseUtils";
 import { formatAiResponse, handleErrorMessage } from "../utils/chatUtils";
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "../../../lib/firebase";
 
 export const useApi = (chatId : string | null) => {
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
@@ -68,21 +70,39 @@ export const useApi = (chatId : string | null) => {
    *
    * Returns the final concatenated response string.
    */
+  // async function setReferences(chatId : string, references: any) {
+
+  //   const chatDoc = await getDoc(doc(db, "chats", chatId));
+  //   if (chatDoc.exists()){
+  //     const chatData = chatDoc.data();
+  //     const chatsList = chatData.chats || {};
+
+  //     const updatedChats = {...chatsList};
+  //     updatedChats[chatsList.length] = {
+  //       ...updatedChats[chatsList.length],
+  //       references: references
+  //     }
+
+  //     await updateDoc(doc(db, "chats", chatId), {
+  //       chats : updatedChats
+  //     })
+  //   }
+    
+  // }
   const processResearchQuery = async (
     model: string,
     userMessage: string,
     setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>,
     setInput: React.Dispatch<React.SetStateAction<string>>,
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+    papers: any[],
+    keywords : string
   ): Promise<string> => {
     let result = "";
     try {
       if (!isApiOnline) {
         throw new Error("API is currently offline. Please try again later.");
       }
-
-      // 1) Get keywords
-      const keywords = await getSearchKeywords(model, userMessage);
 
       if (chatId != null) {
         const formattedString = keywords.replace('"', '').split('%20')
@@ -95,12 +115,7 @@ export const useApi = (chatId : string | null) => {
       }
 
       // 2) Search papers (graceful fallback)
-      let papers: any[] = [];
-      try {
-        papers = await searchPapers(keywords);
-      } catch {
-        console.warn("Paper search failed; continuing without papers.");
-      }
+      
 
       // 3) Build enhanced prompt
       const enhancedInput = formatPaperData(userMessage, papers);

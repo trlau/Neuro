@@ -11,6 +11,7 @@ import { useChat } from "./hooks/useChat";
 import { useApi } from "./hooks/useApi";
 import { generateCitations, exportSession } from "./utils/chatUtils";
 import ReferencesSection from "./components/ReferencesSection";
+import { getSearchKeywords, searchPapers } from "./utils/apiEndpoints";
 
 const DEFAULT_MODEL = "deepseek/deepseek-chat:free";
 
@@ -37,6 +38,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
   const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
+  const [papers, setPapers] = useState([] as any[]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -63,6 +65,18 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
     // Show loading indicator
     setMessages((prev) => [...prev, { role: "assistant", content: "..." }]);
 
+    // 1) Get keywords
+    const keywords = await getSearchKeywords(selectedModel, userMessage);
+
+    let papers: any[] = [];
+    try {
+      papers = await searchPapers(keywords);
+
+      setPapers(papers);
+    } catch {
+      console.warn("Paper search failed; continuing without papers.");
+    }
+
     try {
       // Run the research pipeline
       const raw = await processResearchQuery(
@@ -70,11 +84,13 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
         userMessage,
         setMessages,
         setInput,
-        setIsLoading
+        setIsLoading,
+        papers,
+        keywords
       );
 
       // Persist and display assistant response
-      await setChatMessage(currentChatId, "assistant", raw);
+      await setChatMessage(currentChatId, "assistant", raw, papers);
       setMessages((prev) => {
         const copy = [...prev];
         copy[copy.length - 1] = { role: "assistant", content: raw };
@@ -122,7 +138,7 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
       {/* Background Effects */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/20 via-black to-black z-0" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent z-0" />
-      
+
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
         <ChatHeader
@@ -149,12 +165,13 @@ export const Chat = ({ chatId: initialChatId }: { chatId: string | null }) => {
             <>
               {messages.map((msg, idx) => (
                 <React.Fragment key={idx}>
-                  <Message 
-                    role={msg.role} 
+                  <Message
+                    role={msg.role}
                     content={msg.content}
                     onPdfView={openPdfViewer}
+                    papers={msg.references || papers}
                   />
-                  {msg.role === "assistant" && <ReferencesSection aiResponse={msg.content} />}
+                  {/* {msg.role === "assistant" && <ReferencesSection papers={papers} />} */}
                 </React.Fragment>
               ))}
               <div ref={chatEndRef} />

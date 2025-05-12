@@ -16,6 +16,7 @@ import { User } from "firebase/auth";
 import { MessageType } from "../types";
 import { useApi } from "./useApi";
 import { formatAiResponse, handleErrorMessage } from "../utils/chatUtils";
+import { getSearchKeywords, searchPapers } from "../utils/apiEndpoints";
 
 export const useChat = (initialChatId: string | null) => {
   const [user, loadingAuth] = useAuthState(auth);
@@ -57,6 +58,7 @@ export const useChat = (initialChatId: string | null) => {
           chatsArray.map((c) => ({
             role: c.role,
             content: c.message,
+            references: c.references
           }))
         );
       }
@@ -73,11 +75,13 @@ export const useChat = (initialChatId: string | null) => {
   async function setChatMessage(
     id: string,
     role: string,
-    message: string
+    message: string,
+    references: any[] = []
   ) {
+
     await setDoc(
       doc(db, "chats", id),
-      { chats: arrayUnion({ role, message }) },
+      { chats: arrayUnion({ role, message, references }) },
       { merge: true }
     );
   }
@@ -121,13 +125,26 @@ export const useChat = (initialChatId: string | null) => {
     // Insert loading placeholder
     setMessages((prev) => [...prev, { role: "assistant", content: "..." }]);
 
+    // 1) Get keywords
+    const keywords = await getSearchKeywords(model, userMessage);
+
+    let papers: any[] = [];
+          try {
+            papers = await searchPapers(keywords);
+            
+          } catch {
+            console.warn("Paper search failed; continuing without papers.");
+          }
+
     try {
       const raw = await processResearchQuery(
         model,
         userMessage,
         setMessages,
         setInput,
-        setIsLoading
+        setIsLoading,
+        papers,
+        keywords
       );
       const formatted = formatAiResponse(raw);
 

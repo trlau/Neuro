@@ -11,6 +11,7 @@ export type ModelType = {
 export type MessageType = {
   role: "user" | "assistant";
   content: string;
+  references?: any[]
 };
 
 export type ApiStatus = "checking" | "connected" | "error"; 
