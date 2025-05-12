@@ -13,7 +13,7 @@ import { Search, FileText, Download, CheckCircle2, XCircle, Loader2 } from "luci
 interface Feedback {
   id: string;
   content: string;
-  positivity: string;
+  positivity: boolean;
   is_reviewed: boolean;
   timestamp: { toDate: () => Date };
   userId: string;
@@ -27,15 +27,31 @@ export default function AdminPage() {
   const [filter, setFilter] = useState<"all" | "positive" | "negative">("all");
 
   useEffect(() => {
+    console.log("[AdminPage] userData:", userData);
     const fetchFeedbacks = async () => {
       try {
         const feedbacksRef = collection(db, "feedbacks");
-        const q = query(feedbacksRef, orderBy("timestamp", "desc"));
-        const querySnapshot = await getDocs(q);
-        const feedbacksData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Feedback[];
+        const querySnapshot = await getDocs(feedbacksRef);
+        const feedbacksData = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          // Coerce positivity to boolean
+          let positivity: boolean;
+          if (typeof data.positivity === "boolean") {
+            positivity = data.positivity;
+          } else if (data.positivity === "positive") {
+            positivity = true;
+          } else if (data.positivity === "negative") {
+            positivity = false;
+          } else {
+            positivity = false; // fallback
+          }
+          return {
+            id: doc.id,
+            ...data,
+            positivity,
+          };
+        }) as Feedback[];
+        console.log("[AdminPage] fetched feedbacks:", feedbacksData);
         setFeedbacks(feedbacksData);
       } catch (error) {
         console.error("Error fetching feedbacks:", error);
@@ -43,9 +59,11 @@ export default function AdminPage() {
         setIsLoading(false);
       }
     };
-    if (userData.role === "admin") {
-      fetchFeedbacks();
-    }
+    // TEMP: Fetch feedbacks regardless of role for debugging
+    fetchFeedbacks();
+    // if (userData.role === "admin") {
+    //   fetchFeedbacks();
+    // }
   }, [userData]);
 
   // Filter and search logic
@@ -55,8 +73,8 @@ export default function AdminPage() {
       fb.userId.toLowerCase().includes(search.toLowerCase());
     const matchesFilter =
       filter === "all" ||
-      (filter === "positive" && fb.positivity === "positive") ||
-      (filter === "negative" && fb.positivity === "negative");
+      (filter === "positive" && fb.positivity) ||
+      (filter === "negative" && !fb.positivity);
     return matchesSearch && matchesFilter;
   });
 
@@ -67,7 +85,7 @@ export default function AdminPage() {
       [
         fb.userId,
         '"' + fb.content.replace(/"/g, '""') + '"',
-        fb.positivity,
+        fb.positivity ? "Positive" : "Negative",
         fb.is_reviewed ? "Reviewed" : "Pending",
         fb.timestamp?.toDate ? fb.timestamp.toDate().toLocaleString() : ""
       ].join(",")
@@ -89,7 +107,7 @@ export default function AdminPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/20 via-black to-black z-0" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent z-0" />
         {/* Content */}
-        <div className="relative z-10 flex flex-col h-full max-w-5xl mx-auto py-12 px-4">
+        <div className="relative z-10 flex flex-col h-full w-full py-12 px-4">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Admin Dashboard</h1>
             <button
@@ -141,13 +159,13 @@ export default function AdminPage() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        {fb.positivity === "positive" ? (
+                        {fb.positivity ? (
                           <CheckCircle2 className="text-green-400" size={20} />
                         ) : (
                           <XCircle className="text-red-400" size={20} />
                         )}
                         <span className="text-sm font-medium text-gray-300">
-                          {fb.positivity === "positive" ? "Positive" : "Negative"}
+                          {fb.positivity ? "Positive" : "Negative"}
                         </span>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs ${fb.is_reviewed ? "bg-blue-500/20 text-blue-400" : "bg-yellow-500/20 text-yellow-400"}`}>
