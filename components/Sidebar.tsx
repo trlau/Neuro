@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { db, auth, logout } from "../lib/firebase";
 import { AnimatePresence, motion } from "motion/react";
-import { LogOut, Settings, Search, Book, MessageSquarePlus, PanelLeftClose, PanelLeftOpen, FileText, X, BrainCircuit, User } from "lucide-react";
+import { LogOut, Settings, Search, Book, MessageSquarePlus, PanelLeftClose, PanelLeftOpen, FileText, X, BrainCircuit, User, Shield } from "lucide-react";
 import {
   collection,
   query,
@@ -260,6 +260,13 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
                 </Button>
                 <Button
                   variant="ghost"
+                  onClick={() => router.push("/admin")}
+                  className="w-full justify-start gap-2 text-gray-300 hover:text-white hover:bg-white/10"
+                >
+                  <Shield size={18} /> Admin Dashboard
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={() => setSettingsOpen(true)}
                   className="w-full justify-start gap-2 text-gray-300 hover:text-white hover:bg-white/10"
                 >
@@ -307,6 +314,20 @@ export default function Sidebar({ onSelectChat, selectedChatId }: SidebarProps) 
                   </TooltipTrigger>
                   <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
                     User Guide
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() => router.push("/admin")}
+                      className="p-2 hover:bg-white/10"
+                    >
+                      <Shield size={18} className="text-gray-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="bg-black/90 text-white px-3 py-2 rounded-md text-sm border border-white/10">
+                    Admin Dashboard
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>

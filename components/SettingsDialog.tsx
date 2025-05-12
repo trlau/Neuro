@@ -47,7 +47,7 @@ export function SettingsDialog({
         >
           {/* Close Button */}
           <DialogClose asChild>
-            <button className="absolute right-4 top-4 text-gray-400 hover:text-white transition">
+            <button className="absolute right-4 top-4 text-gray-400 hover:text-white transition" aria-label="Close settings">
               <X size={22} strokeWidth={2.5} />
             </button>
           </DialogClose>
@@ -71,50 +71,16 @@ export function SettingsDialog({
 
             <Separator className="bg-zinc-800" />
 
-            {/* Appearance */}
-            <div className="w-full text-left space-y-4">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Appearance</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { value: "light", icon: Sun, label: "Light" },
-                  { value: "dark", icon: Moon, label: "Dark" },
-                  { value: "system", icon: Monitor, label: "System" },
-                ].map(({ value, icon: Icon, label }) => (
-                  <button
-                    key={value}
-                    onClick={() => mounted && setTheme(value)}
-                    className={`flex flex-col items-center gap-2 rounded-lg p-3 transition ${
-                      theme === value
-                        ? "bg-zinc-800 text-white border border-zinc-700"
-                        : "bg-zinc-900/50 text-gray-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
-                    }`}
-                  >
-                    <Icon className="size-5" />
-                    <span className="text-sm">{label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Separator className="bg-zinc-800" />
-
             {/* Assistant Behavior */}
             <div className="w-full text-left space-y-4">
               <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Assistant Behavior</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {["neutral", "formal", "friendly"].map((value) => (
-                  <button
-                    key={value}
-                    onClick={() => setTone(value)}
-                    className={`flex-1 rounded-lg px-4 py-3 text-sm transition ${
-                      tone === value
-                        ? "bg-zinc-800 text-white border border-zinc-700"
-                        : "bg-zinc-900/50 text-gray-400 hover:bg-zinc-800 hover:text-white border border-zinc-800"
-                    }`}
-                  >
-                    {value.charAt(0).toUpperCase() + value.slice(1)}
-                  </button>
-                ))}
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  disabled
+                  className="flex-1 rounded-lg px-4 py-3 text-sm bg-zinc-900/50 text-gray-400 border border-zinc-800 opacity-60 cursor-not-allowed flex items-center gap-2 justify-center"
+                >
+                  Coming Soon
+                </button>
               </div>
             </div>
 
