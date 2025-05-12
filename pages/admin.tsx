@@ -127,7 +127,7 @@ export default function AdminPage() {
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <div className="flex flex-col min-h-screen w-full bg-black text-white font-space-grotesk">
+      <div className="flex flex-col min-h-screen w-screen bg-black text-white font-space-grotesk">
         {/* Admin Title & Description */}
         <div className="w-full px-8 pt-10 pb-4">
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 mb-2">Admin Dashboard</h1>
