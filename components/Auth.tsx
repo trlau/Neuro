@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import {motion} from "motion/react";
 import { loginWithGoogle, loginWithGitHub } from "../lib/firebase";
 import { useRouter } from "next/router";
+import { redirect } from "next/navigation";
 
 export default function Auth({
   className,
@@ -34,7 +35,7 @@ export default function Auth({
           {/* Return to Landing Button */}
           <Button 
             type="button" 
-            onClick={() => router.push('/')}
+            onClick={() => {router.push("/")}}
             className="w-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
           >
             Return to Landing

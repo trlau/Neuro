@@ -31,7 +31,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         {loading ? (
           <LoadingPage></LoadingPage>
-        ) : !user ? (
+        ) : !user && router.pathname != "/" ? (
           <Auth />
         )
           : router.pathname == "/admin" ? (
